@@ -1,0 +1,56 @@
+/*
+ * Scoped stylesheet for Panel 1 (case input) and the standalone
+ * interval bar. Two scopes:
+ *
+ *   .case-input    panel-level rules: identity strip, section labels,
+ *                  description, threshold callout.
+ *   .interval-bar  the bar's own rules: track, shaded band, threshold
+ *                  tick, score marker, endpoint labels.
+ *
+ * The bar is scoped separately so render_interval_bar() can be
+ * rendered standalone (used directly in the three-way comparison's
+ * middle column in 2e) without depending on .case-input.
+ *
+ * Palette stays in the CVD-safe family established in 2b:
+ *   deep blue   #1F3D5C  primary text / score marker
+ *   mid blue    #5B8AB8  interval band, secondary accents
+ *   pale blue   #BFD3E6  fired/active tint
+ *   vermillion  #D55E00  threshold tick (high-attention, single hue)
+ *   neutrals    #FAFAFA #E0E0E0 #555555 #212121
+ */
+
+.case-input text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+
+/* --- Identity strip --- */
+.case-input .case-badge {
+  fill: #1F3D5C;
+  stroke: none;
+}
+.case-input .case-badge-id  { fill: #FFFFFF; font-size: 13px; font-weight: bold; }
+.case-input .domain-tag     { font-size: 12px; fill: #555555; }
+
+/* --- Section label above the bar --- */
+.case-input .section-label  { font-size: 11px; fill: #555555; letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* --- Score value floating above its marker --- */
+.case-input .score-value    { font-size: 18px; font-weight: bold; fill: #1F3D5C; }
+
+/* --- Threshold label below the threshold tick --- */
+.case-input .threshold-label{ font-size: 10px; fill: #D55E00; font-weight: bold; }
+
+/* --- Description (free-text context, smallest weight) --- */
+.case-input .case-description { font-size: 12px; fill: #333333; }
+
+/* --- Interval bar (scoped separately so it works standalone) --- */
+.interval-bar text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #555555;
+}
+.interval-bar .bar-track     { fill: #E0E0E0; }
+.interval-bar .bar-interval  { fill: #BFD3E6; }
+.interval-bar .threshold-tick { stroke: #D55E00; stroke-width: 2; fill: none; }
+.interval-bar .score-marker  { fill: #1F3D5C; stroke: #FFFFFF; stroke-width: 1.5; }
+.interval-bar .endpoint-label { font-size: 9px; }

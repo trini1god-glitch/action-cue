@@ -1,0 +1,2699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>ActionCue figures — Week 2 export</title>
+  <style>
+    body { font: 14px -apple-system, "Segoe UI", Roboto, sans-serif; padding: 24px; max-width: 1600px; margin: 0 auto; color: #212121; }
+    section { margin-bottom: 48px; }
+    h2 { font-size: 14px; margin: 0 0 8px 0; }
+    svg { display: block; }
+  </style>
+</head>
+<body>
+  <h1 style="font-size: 16px;">ActionCue — Week 2 figure export</h1>
+  <section>
+    <h2>Figure 1 — three-panel row (Case C)</h2>
+    <svg viewBox="0 0 1440 462" width="1440" height="462" class="three-panel-row" xmlns="http://www.w3.org/2000/svg">
+  <style>/*
+ * Scoped stylesheet for Panel 1 (case input) and the standalone
+ * interval bar. Two scopes:
+ *
+ *   .case-input    panel-level rules: identity strip, section labels,
+ *                  description, threshold callout.
+ *   .interval-bar  the bar's own rules: track, shaded band, threshold
+ *                  tick, score marker, endpoint labels.
+ *
+ * The bar is scoped separately so render_interval_bar() can be
+ * rendered standalone (used directly in the three-way comparison's
+ * middle column in 2e) without depending on .case-input.
+ *
+ * Palette stays in the CVD-safe family established in 2b:
+ *   deep blue   #1F3D5C  primary text / score marker
+ *   mid blue    #5B8AB8  interval band, secondary accents
+ *   pale blue   #BFD3E6  fired/active tint
+ *   vermillion  #D55E00  threshold tick (high-attention, single hue)
+ *   neutrals    #FAFAFA #E0E0E0 #555555 #212121
+ */
+
+.case-input text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+
+/* --- Identity strip --- */
+.case-input .case-badge {
+  fill: #1F3D5C;
+  stroke: none;
+}
+.case-input .case-badge-id  { fill: #FFFFFF; font-size: 13px; font-weight: bold; }
+.case-input .domain-tag     { font-size: 12px; fill: #555555; }
+
+/* --- Section label above the bar --- */
+.case-input .section-label  { font-size: 11px; fill: #555555; letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* --- Score value floating above its marker --- */
+.case-input .score-value    { font-size: 18px; font-weight: bold; fill: #1F3D5C; }
+
+/* --- Threshold label below the threshold tick --- */
+.case-input .threshold-label{ font-size: 10px; fill: #D55E00; font-weight: bold; }
+
+/* --- Description (free-text context, smallest weight) --- */
+.case-input .case-description { font-size: 12px; fill: #333333; }
+
+/* --- Interval bar (scoped separately so it works standalone) --- */
+.interval-bar text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #555555;
+}
+.interval-bar .bar-track     { fill: #E0E0E0; }
+.interval-bar .bar-interval  { fill: #BFD3E6; }
+.interval-bar .threshold-tick { stroke: #D55E00; stroke-width: 2; fill: none; }
+.interval-bar .score-marker  { fill: #1F3D5C; stroke: #FFFFFF; stroke-width: 1.5; }
+.interval-bar .endpoint-label { font-size: 9px; }
+
+
+/*
+ * Scoped stylesheet for Panel 2 (uncertainty signals).
+ * Single top-level scope: .signals
+ *
+ * Two visual modes per row, switched by data-detected:
+ *   data-detected="true"  -> rail row: vermillion accent, filled indicator,
+ *                            weighty label, detail line shown
+ *   data-detected="false" -> list row: hollow indicator, muted label, no detail
+ *
+ * Two indicator shapes per row, switched by data-kind:
+ *   data-kind="detection" -> circle visible, triangle hidden
+ *   data-kind="context"   -> triangle visible, circle hidden
+ *
+ * Palette stays in the CVD-safe family locked in 2b:
+ *   vermillion #D55E00  detected accent strip + filled indicator
+ *   deep blue  #1F3D5C  detected label text
+ *   neutrals   #555555 #888888 #999999 #E0E0E0  undetected / dividers
+ */
+
+.signals text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+
+/* --- Section label --- */
+.signals .section-label {
+  font-size: 11px;
+  fill: #555555;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* --- Detected rail --- */
+.signals .rail-accent {
+  fill: #D55E00;
+}
+
+.signals .signal-row[data-detected="true"] .signal-indicator {
+  fill: #D55E00;
+  stroke: none;
+}
+
+.signals .signal-row[data-detected="true"] .signal-label {
+  font-size: 12px;
+  font-weight: 600;
+  fill: #1F3D5C;
+}
+
+.signals .signal-row[data-detected="true"] .signal-detail {
+  font-size: 10px;
+  fill: #555555;
+}
+
+/* --- Undetected list --- */
+.signals .signal-row[data-detected="false"] .signal-indicator {
+  fill: none;
+  stroke: #999999;
+  stroke-width: 1;
+}
+
+.signals .signal-row[data-detected="false"] .signal-label {
+  font-size: 11px;
+  fill: #888888;
+}
+
+/* --- Indicator shape swap by kind --- */
+.signals .signal-row[data-kind="detection"] polygon.signal-indicator {
+  display: none;
+}
+
+.signals .signal-row[data-kind="context"] circle.signal-indicator {
+  display: none;
+}
+
+/* --- Divider between rail and list --- */
+.signals .undetected-divider {
+  stroke: #E0E0E0;
+  stroke-dasharray: 2 3;
+  stroke-width: 1;
+}
+
+.signals .undetected-caption {
+  font-size: 9px;
+  fill: #999999;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+
+/*
+ * Scoped stylesheet for the ActionCue cascade renderer.
+ *
+ * All selectors are prefixed `.cascade` so multiple cascades on the
+ * same page (Week 3 three-way comparison) do not bleed styles.
+ *
+ * The palette is a deliberate deviation from SPEC.md §6 / §9 colors:
+ * every ordinal axis (force gradient) is encoded by luminance, and
+ * every categorical axis (class accents) uses Wong palette hues.
+ * This makes the design robust under protanopia, deuteranopia, and
+ * tritanopia.
+ */
+
+.cascade text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+.cascade .band-label { font-size: 14px; }
+.cascade .on-demand text { font-size: 12px; }
+
+/* --- Band background --- */
+.cascade .band-bg {
+  fill: #FFFFFF;
+  stroke: #D0D0D0;
+  stroke-width: 1;
+  rx: 4;
+}
+.cascade .band[data-fired="true"]  .band-bg { fill: #FAFAFA; }
+.cascade .band[data-winner="true"] .band-bg {
+  stroke: #000000;
+  stroke-width: 2;
+  fill: #F5F5F5;
+}
+
+/* --- Class accent stripe (categorical, Wong palette) --- */
+.cascade .band[data-class="validity"]       .band-accent { fill: #D55E00; }
+.cascade .band[data-class="completion"]     .band-accent { fill: #009E73; }
+.cascade .band[data-class="sensitivity"]    .band-accent { fill: #CC79A7; }
+.cascade .band[data-class="interpretation"] .band-accent { fill: #0072B2; }
+
+/* --- On-demand reveal layer --- */
+.cascade .band .on-demand {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease-out;
+}
+.cascade .band[data-expanded="true"] .on-demand { opacity: 1; }
+.cascade[data-reveal="all"] .band[data-fired="true"] .on-demand { opacity: 1; }
+
+.cascade .band:hover .band-bg { stroke-width: 2; cursor: pointer; }
+
+/* --- Status dot --- */
+.cascade .band .status circle { stroke: #000000; stroke-width: 1.5; }
+.cascade .band[data-fired="true"]  .status circle { fill: #000000; }
+.cascade .band[data-fired="false"] .status circle { fill: #FFFFFF; }
+
+/* --- Resolution arrow --- */
+.cascade .resolution-arrow {
+  stroke: #000000;
+  stroke-width: 2;
+  fill: none;
+}
+.cascade .resolution-label { font-size: 10px; fill: #555555; }
+
+/* --- Horizontal force strip (replaces the old vertical force scale) ---
+ * Four ordinal cells (advisory → strong → mandatory → blocking) read as a
+ * vocabulary axis. Active cell takes the force tint at full strength + a
+ * bold dark-blue label (white text on the deepest tint for contrast).
+ * Inactive cells stay muted neutral.
+ */
+.cascade .force-strip .strip-cell-bg {
+  fill: #F4F4F4;
+  stroke: #E0E0E0;
+  stroke-width: 1;
+}
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="advisory"]  { fill: #E8F1F8; stroke: #BFD3E6; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="strong"]    { fill: #BFD3E6; stroke: #5B8AB8; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="mandatory"] { fill: #F2C5A3; stroke: #D55E00; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="blocking"]  { fill: #D55E00; stroke: #1F3D5C; }
+
+.cascade .force-strip .strip-cell-label {
+  font-size: 11px;
+  fill: #888888;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-label { fill: #1F3D5C; font-weight: 700; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="blocking"] + .strip-cell-label,
+.cascade .force-strip .strip-cell[data-active="true"][data-level="blocking"] .strip-cell-label { fill: #FFFFFF; }
+
+/* --- Safety lift arrow under the strip (visual only; textual rationale
+       lives in the safety banner below) --- */
+.cascade .force-strip .strip-safety-arrow {
+  stroke: #D55E00;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* --- Safety banner (vermillion accent strip + textual rationale) ---
+ * Vermillion across the cascade always means "needs attention" — visual
+ * rhyme with the threshold tick in Panel 1 and detected signals in Panel 2.
+ */
+.cascade .safety-banner .safety-bg {
+  fill: #FFF6EF;             /* very pale vermillion wash */
+  stroke: #F2C5A3;
+  stroke-width: 1;
+}
+.cascade .safety-banner .safety-accent {
+  fill: #D55E00;
+}
+.cascade .safety-banner .safety-title {
+  font-size: 11px;
+  font-weight: 600;
+  fill: #1F3D5C;
+}
+.cascade .safety-banner .safety-detail {
+  font-size: 10px;
+  fill: #555555;
+}
+
+/* --- Output box (canonical cue display: action + force pill + via caption) ---
+ * No box background — the panel cell is the container. Action is the
+ * typographic hero; pill is the visual hero (force-tint at full strength).
+ * Force tints CVD-safe per §9:
+ *   advisory  #E8F1F8  pale blue
+ *   strong    #BFD3E6  mid blue
+ *   mandatory #F2C5A3  vermillion-tinted
+ *   blocking  #D55E00  deep vermillion (white text inside the pill)
+ */
+.cascade .output .cue-action {
+  font-size: 22px;
+  font-weight: 700;
+  fill: #1F3D5C;
+  letter-spacing: 0.02em;
+}
+
+.cascade .output .cue-via {
+  font-size: 10px;
+  fill: #888888;
+  font-style: italic;
+}
+
+.cascade .output .force-pill { stroke: none; }
+.cascade .output .force-pill[data-force="advisory"]  { fill: #E8F1F8; }
+.cascade .output .force-pill[data-force="strong"]    { fill: #BFD3E6; }
+.cascade .output .force-pill[data-force="mandatory"] { fill: #F2C5A3; }
+.cascade .output .force-pill[data-force="blocking"]  { fill: #D55E00; }
+
+.cascade .output .force-word {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.cascade .output .force-word[data-force="advisory"]  { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="strong"]    { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="mandatory"] { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="blocking"]  { fill: #FFFFFF; }
+
+
+/* --- On-demand text (signal label only; rationale is always-visible via
+       band-rationale, and the rule id is debugging-only — kept in
+       data-rationale on the band group but not visually rendered). --- */
+.cascade .on-demand-signal    { font-size: 10px; font-style: italic; fill: #555555; }
+
+/* --- Always-visible band rationale (fired bands only, both reveal modes) ---
+ * Pulls visual weight onto the cascade where the contribution lives.
+ * Fired bands get a rationale line directly under their class label so
+ * the reader sees *what* fired, not just *that* it fired.
+ */
+.cascade .band-rationale {
+  font-size: 11px;
+  fill: #333333;
+}
+
+/* --- Mute unfired bands ---
+ * Per the 2e cascade review: unfired bands are reference material
+ * ("the system considered this and it didn't fire"), not primary content.
+ * Dropping their opacity lets fired bands dominate the visual hierarchy
+ * — mirrors Panel 2's detected-rail / undetected-list distinction.
+ */
+.cascade .band[data-fired="false"] { opacity: 0.45; }
+.cascade .band[data-fired="false"] .band-label { fill: #555555; }
+</style>
+  <style>
+  /* Panel 1 chrome */
+  .case-input .section-label { font-size: 13px; }
+  .case-input .domain-tag { font-size: 13px; }
+  .case-input .threshold-label { font-size: 13px; }
+  .case-input .case-description { font-size: 13px; }
+  .interval-bar .endpoint-label { font-size: 13px; }
+  /* Panel 2 signals */
+  .signals .signal-label { font-size: 13px; }
+  .signals .signal-detail { font-size: 12px; }
+  /* Panel 3 cascade — band labels stay 14px; bump everything else small */
+  .cascade .band-rationale { font-size: 12px; }
+  .cascade .on-demand-signal { font-size: 11px; }
+  .cascade .strip-cell-label { font-size: 12px; }
+  .cascade .safety-detail { font-size: 11px; }
+</style>
+  <text x="8" y="16" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#212121">(a)</text>
+  <text x="368" y="16" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#212121">(b)</text>
+  <text x="728" y="16" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#212121">(c)</text>
+  <g transform="translate(0, 22)">
+<svg viewBox="0 0 360 240" width="360" height="240" class="case-input" xmlns="http://www.w3.org/2000/svg">
+  
+  <rect class="case-badge" x="16" y="10" width="26" height="22" rx="4" />
+  <text class="case-badge-id" x="29" y="26" text-anchor="middle">C</text>
+  <text class="domain-tag" x="50" y="24">healthcare</text>
+  <text class="section-label" x="16" y="58">AI risk score</text>
+  <text class="score-value" x="216" y="90" text-anchor="middle">0.62</text>
+  <g transform="translate(16, 100)">
+<svg viewBox="0 0 328 56" width="328" height="56" class="interval-bar" xmlns="http://www.w3.org/2000/svg">
+  
+  <rect class="bar-track" x="12" y="22" width="304" height="8" rx="2" />
+  <rect class="bar-interval" x="179" y="22" width="43" height="8" rx="2" />
+  <line class="threshold-tick" x1="194" y1="16" x2="194" y2="36" />
+  <circle class="score-marker" cx="200" cy="26" r="5" />
+  <text class="endpoint-label" x="12" y="50" text-anchor="start">0.0</text>
+  <text class="endpoint-label" x="316" y="50" text-anchor="end">1.0</text>
+</svg>
+  </g>
+  <text class="threshold-label" x="210" y="158" text-anchor="middle">Threshold 0.60</text>
+  <text class="case-description" x="16" y="188"><tspan x="16" dy="0">Patient with risk at threshold; oxygen saturation</tspan><tspan x="16" dy="14">missing.</tspan></text>
+</svg>
+  </g>
+  <g transform="translate(360, 22)">
+<svg viewBox="0 0 360 240" width="360" height="240" class="signals" xmlns="http://www.w3.org/2000/svg">
+  
+  <text class="section-label" x="16" y="20">UNCERTAINTY SIGNALS</text>
+  <g class="signal-row" id="signal-row-missing_critical_data" data-detected="true" data-kind="detection">
+    <rect class="rail-accent" x="16" y="38" width="3" height="36" />
+    <circle class="signal-indicator" cx="30" cy="52" r="4" /><polygon class="signal-indicator" points="30,48 26,56 34,56" />
+    <text class="signal-label" x="40" y="52">Missing critical data</text>
+    <text class="signal-detail" x="40" y="66"><tspan x="40" dy="0">oxygen saturation</tspan></text>
+  </g>
+  <g class="signal-row" id="signal-row-threshold_crossing" data-detected="true" data-kind="detection">
+    <rect class="rail-accent" x="16" y="78" width="3" height="36" />
+    <circle class="signal-indicator" cx="30" cy="92" r="4" /><polygon class="signal-indicator" points="30,88 26,96 34,96" />
+    <text class="signal-label" x="40" y="92">Interval crosses threshold</text>
+    <text class="signal-detail" x="40" y="106"><tspan x="40" dy="0">interval (0.55–0.69) contains threshold 0.60</tspan></text>
+  </g>
+  <g class="undetected-divider-group">
+    <text class="undetected-caption" x="16" y="120">not detected</text>
+    <line class="undetected-divider" x1="16" y1="124" x2="344" y2="124" />
+  </g>
+  <g class="signal-row" id="signal-row-out_of_scope" data-detected="false" data-kind="detection">
+    <circle class="signal-indicator" cx="22" cy="147" r="4" /><polygon class="signal-indicator" points="22,143 18,151 26,151" />
+    <text class="signal-label" x="32" y="150">Out of scope</text>
+  </g>
+  <g class="signal-row" id="signal-row-explanation_instability" data-detected="false" data-kind="detection">
+    <circle class="signal-indicator" cx="22" cy="165" r="4" /><polygon class="signal-indicator" points="22,161 18,169 26,169" />
+    <text class="signal-label" x="32" y="168">Explanation instability</text>
+  </g>
+  <g class="signal-row" id="signal-row-decision_context" data-detected="false" data-kind="context">
+    <circle class="signal-indicator" cx="22" cy="183" r="4" /><polygon class="signal-indicator" points="22,179 18,187 26,187" />
+    <text class="signal-label" x="32" y="186">Decision context</text>
+  </g>
+</svg>
+  </g>
+  <g transform="translate(720, 22)">
+<svg viewBox="0 0 720 440" width="720" height="440" class="cascade" data-reveal="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="cascade-arrowhead" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+    </marker>
+  </defs>
+  
+  <g class="back-references"></g>
+  <g class="cascade-bands">
+    <g class="band" data-class="validity" data-fired="false" data-winner="false">
+      <rect class="band-bg" x="40" y="20" width="320" height="80" />
+      <rect class="band-accent" x="40" y="20" width="6" height="80" />
+      <text class="band-label" x="54" y="50">Validity</text>
+      
+      <g class="status">
+        <circle cx="340" cy="60" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        
+      </g>
+    </g>
+    <g class="band" data-class="completion" data-fired="true" data-winner="true" data-rationale="Critical inputs missing: oxygen saturation." data-signal-label="Missing critical data">
+      <rect class="band-bg" x="40" y="110" width="320" height="80" />
+      <rect class="band-accent" x="40" y="110" width="6" height="80" />
+      <text class="band-label" x="54" y="140">Completion</text>
+      <text class="band-rationale" x="54" y="158"><tspan x="54" dy="0">Critical inputs missing: oxygen saturation.</tspan></text>
+      <g class="status">
+        <circle cx="340" cy="150" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        <text class="on-demand-signal" x="54" y="175">from signal: Missing critical data</text>
+      </g>
+    </g>
+    <g class="band" data-class="sensitivity" data-fired="true" data-winner="false" data-rationale="Risk interval (0.55–0.69) crosses the action threshold (0.60)." data-signal-label="Interval crosses threshold">
+      <rect class="band-bg" x="40" y="200" width="320" height="80" />
+      <rect class="band-accent" x="40" y="200" width="6" height="80" />
+      <text class="band-label" x="54" y="230">Sensitivity</text>
+      <text class="band-rationale" x="54" y="248"><tspan x="54" dy="0">Risk interval (0.55–0.69) crosses the action</tspan><tspan x="54" dy="11">threshold (0.60).</tspan></text>
+      <g class="status">
+        <circle cx="340" cy="240" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        <text class="on-demand-signal" x="54" y="276">from signal: Interval crosses threshold</text>
+      </g>
+    </g>
+    <g class="band" data-class="interpretation" data-fired="false" data-winner="false">
+      <rect class="band-bg" x="40" y="290" width="320" height="80" />
+      <rect class="band-accent" x="40" y="290" width="6" height="80" />
+      <text class="band-label" x="54" y="320">Interpretation</text>
+      
+      <g class="status">
+        <circle cx="340" cy="330" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        
+      </g>
+    </g>
+  </g>
+  <g class="resolution">
+    <path class="resolution-arrow" data-tip="highest-precedence fired class wins" d="M 360 150 L 390 150 L 390 194 L 420 194" marker-end="url(#cascade-arrowhead)" />
+  </g>
+  <g class="output" data-force="mandatory">
+    <text class="cue-action" x="490" y="168" text-anchor="middle">COMPLETE</text>
+    <rect class="force-pill" data-force="mandatory" x="432" y="182" width="116" height="24" rx="12" />
+    <text class="force-word" data-force="mandatory" x="490" y="198" text-anchor="middle">MANDATORY</text>
+    <text class="cue-via" x="490" y="224" text-anchor="middle">via completion</text>
+  </g>
+  <g class="force-strip">
+    <g class="strip-cell" data-level="advisory" data-active="false"><rect class="strip-cell-bg" data-level="advisory" x="114" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="174" y="392" text-anchor="middle">advisory</text></g>
+    <g class="strip-cell" data-level="strong" data-active="false"><rect class="strip-cell-bg" data-level="strong" x="238" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="298" y="392" text-anchor="middle">strong</text></g>
+    <g class="strip-cell" data-level="mandatory" data-active="true"><rect class="strip-cell-bg" data-level="mandatory" x="362" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="422" y="392" text-anchor="middle">mandatory</text></g>
+    <g class="strip-cell" data-level="blocking" data-active="false"><rect class="strip-cell-bg" data-level="blocking" x="486" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="546" y="392" text-anchor="middle">blocking</text></g>
+  </g>
+
+</svg>
+  </g>
+</svg>
+  </section>
+  <section>
+    <h2>Figure 2 — three-way comparison (Case C)</h2>
+    <svg viewBox="0 0 1080 582" width="1080" height="582" class="three-way" xmlns="http://www.w3.org/2000/svg">
+  <style>/*
+ * Scoped stylesheet for Panel 1 (case input) and the standalone
+ * interval bar. Two scopes:
+ *
+ *   .case-input    panel-level rules: identity strip, section labels,
+ *                  description, threshold callout.
+ *   .interval-bar  the bar's own rules: track, shaded band, threshold
+ *                  tick, score marker, endpoint labels.
+ *
+ * The bar is scoped separately so render_interval_bar() can be
+ * rendered standalone (used directly in the three-way comparison's
+ * middle column in 2e) without depending on .case-input.
+ *
+ * Palette stays in the CVD-safe family established in 2b:
+ *   deep blue   #1F3D5C  primary text / score marker
+ *   mid blue    #5B8AB8  interval band, secondary accents
+ *   pale blue   #BFD3E6  fired/active tint
+ *   vermillion  #D55E00  threshold tick (high-attention, single hue)
+ *   neutrals    #FAFAFA #E0E0E0 #555555 #212121
+ */
+
+.case-input text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+
+/* --- Identity strip --- */
+.case-input .case-badge {
+  fill: #1F3D5C;
+  stroke: none;
+}
+.case-input .case-badge-id  { fill: #FFFFFF; font-size: 13px; font-weight: bold; }
+.case-input .domain-tag     { font-size: 12px; fill: #555555; }
+
+/* --- Section label above the bar --- */
+.case-input .section-label  { font-size: 11px; fill: #555555; letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* --- Score value floating above its marker --- */
+.case-input .score-value    { font-size: 18px; font-weight: bold; fill: #1F3D5C; }
+
+/* --- Threshold label below the threshold tick --- */
+.case-input .threshold-label{ font-size: 10px; fill: #D55E00; font-weight: bold; }
+
+/* --- Description (free-text context, smallest weight) --- */
+.case-input .case-description { font-size: 12px; fill: #333333; }
+
+/* --- Interval bar (scoped separately so it works standalone) --- */
+.interval-bar text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #555555;
+}
+.interval-bar .bar-track     { fill: #E0E0E0; }
+.interval-bar .bar-interval  { fill: #BFD3E6; }
+.interval-bar .threshold-tick { stroke: #D55E00; stroke-width: 2; fill: none; }
+.interval-bar .score-marker  { fill: #1F3D5C; stroke: #FFFFFF; stroke-width: 1.5; }
+.interval-bar .endpoint-label { font-size: 9px; }
+
+
+/*
+ * Scoped stylesheet for Panel 2 (uncertainty signals).
+ * Single top-level scope: .signals
+ *
+ * Two visual modes per row, switched by data-detected:
+ *   data-detected="true"  -> rail row: vermillion accent, filled indicator,
+ *                            weighty label, detail line shown
+ *   data-detected="false" -> list row: hollow indicator, muted label, no detail
+ *
+ * Two indicator shapes per row, switched by data-kind:
+ *   data-kind="detection" -> circle visible, triangle hidden
+ *   data-kind="context"   -> triangle visible, circle hidden
+ *
+ * Palette stays in the CVD-safe family locked in 2b:
+ *   vermillion #D55E00  detected accent strip + filled indicator
+ *   deep blue  #1F3D5C  detected label text
+ *   neutrals   #555555 #888888 #999999 #E0E0E0  undetected / dividers
+ */
+
+.signals text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+
+/* --- Section label --- */
+.signals .section-label {
+  font-size: 11px;
+  fill: #555555;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* --- Detected rail --- */
+.signals .rail-accent {
+  fill: #D55E00;
+}
+
+.signals .signal-row[data-detected="true"] .signal-indicator {
+  fill: #D55E00;
+  stroke: none;
+}
+
+.signals .signal-row[data-detected="true"] .signal-label {
+  font-size: 12px;
+  font-weight: 600;
+  fill: #1F3D5C;
+}
+
+.signals .signal-row[data-detected="true"] .signal-detail {
+  font-size: 10px;
+  fill: #555555;
+}
+
+/* --- Undetected list --- */
+.signals .signal-row[data-detected="false"] .signal-indicator {
+  fill: none;
+  stroke: #999999;
+  stroke-width: 1;
+}
+
+.signals .signal-row[data-detected="false"] .signal-label {
+  font-size: 11px;
+  fill: #888888;
+}
+
+/* --- Indicator shape swap by kind --- */
+.signals .signal-row[data-kind="detection"] polygon.signal-indicator {
+  display: none;
+}
+
+.signals .signal-row[data-kind="context"] circle.signal-indicator {
+  display: none;
+}
+
+/* --- Divider between rail and list --- */
+.signals .undetected-divider {
+  stroke: #E0E0E0;
+  stroke-dasharray: 2 3;
+  stroke-width: 1;
+}
+
+.signals .undetected-caption {
+  font-size: 9px;
+  fill: #999999;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+
+/*
+ * Scoped stylesheet for the ActionCue cascade renderer.
+ *
+ * All selectors are prefixed `.cascade` so multiple cascades on the
+ * same page (Week 3 three-way comparison) do not bleed styles.
+ *
+ * The palette is a deliberate deviation from SPEC.md §6 / §9 colors:
+ * every ordinal axis (force gradient) is encoded by luminance, and
+ * every categorical axis (class accents) uses Wong palette hues.
+ * This makes the design robust under protanopia, deuteranopia, and
+ * tritanopia.
+ */
+
+.cascade text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+.cascade .band-label { font-size: 14px; }
+.cascade .on-demand text { font-size: 12px; }
+
+/* --- Band background --- */
+.cascade .band-bg {
+  fill: #FFFFFF;
+  stroke: #D0D0D0;
+  stroke-width: 1;
+  rx: 4;
+}
+.cascade .band[data-fired="true"]  .band-bg { fill: #FAFAFA; }
+.cascade .band[data-winner="true"] .band-bg {
+  stroke: #000000;
+  stroke-width: 2;
+  fill: #F5F5F5;
+}
+
+/* --- Class accent stripe (categorical, Wong palette) --- */
+.cascade .band[data-class="validity"]       .band-accent { fill: #D55E00; }
+.cascade .band[data-class="completion"]     .band-accent { fill: #009E73; }
+.cascade .band[data-class="sensitivity"]    .band-accent { fill: #CC79A7; }
+.cascade .band[data-class="interpretation"] .band-accent { fill: #0072B2; }
+
+/* --- On-demand reveal layer --- */
+.cascade .band .on-demand {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease-out;
+}
+.cascade .band[data-expanded="true"] .on-demand { opacity: 1; }
+.cascade[data-reveal="all"] .band[data-fired="true"] .on-demand { opacity: 1; }
+
+.cascade .band:hover .band-bg { stroke-width: 2; cursor: pointer; }
+
+/* --- Status dot --- */
+.cascade .band .status circle { stroke: #000000; stroke-width: 1.5; }
+.cascade .band[data-fired="true"]  .status circle { fill: #000000; }
+.cascade .band[data-fired="false"] .status circle { fill: #FFFFFF; }
+
+/* --- Resolution arrow --- */
+.cascade .resolution-arrow {
+  stroke: #000000;
+  stroke-width: 2;
+  fill: none;
+}
+.cascade .resolution-label { font-size: 10px; fill: #555555; }
+
+/* --- Horizontal force strip (replaces the old vertical force scale) ---
+ * Four ordinal cells (advisory → strong → mandatory → blocking) read as a
+ * vocabulary axis. Active cell takes the force tint at full strength + a
+ * bold dark-blue label (white text on the deepest tint for contrast).
+ * Inactive cells stay muted neutral.
+ */
+.cascade .force-strip .strip-cell-bg {
+  fill: #F4F4F4;
+  stroke: #E0E0E0;
+  stroke-width: 1;
+}
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="advisory"]  { fill: #E8F1F8; stroke: #BFD3E6; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="strong"]    { fill: #BFD3E6; stroke: #5B8AB8; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="mandatory"] { fill: #F2C5A3; stroke: #D55E00; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="blocking"]  { fill: #D55E00; stroke: #1F3D5C; }
+
+.cascade .force-strip .strip-cell-label {
+  font-size: 11px;
+  fill: #888888;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-label { fill: #1F3D5C; font-weight: 700; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="blocking"] + .strip-cell-label,
+.cascade .force-strip .strip-cell[data-active="true"][data-level="blocking"] .strip-cell-label { fill: #FFFFFF; }
+
+/* --- Safety lift arrow under the strip (visual only; textual rationale
+       lives in the safety banner below) --- */
+.cascade .force-strip .strip-safety-arrow {
+  stroke: #D55E00;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* --- Safety banner (vermillion accent strip + textual rationale) ---
+ * Vermillion across the cascade always means "needs attention" — visual
+ * rhyme with the threshold tick in Panel 1 and detected signals in Panel 2.
+ */
+.cascade .safety-banner .safety-bg {
+  fill: #FFF6EF;             /* very pale vermillion wash */
+  stroke: #F2C5A3;
+  stroke-width: 1;
+}
+.cascade .safety-banner .safety-accent {
+  fill: #D55E00;
+}
+.cascade .safety-banner .safety-title {
+  font-size: 11px;
+  font-weight: 600;
+  fill: #1F3D5C;
+}
+.cascade .safety-banner .safety-detail {
+  font-size: 10px;
+  fill: #555555;
+}
+
+/* --- Output box (canonical cue display: action + force pill + via caption) ---
+ * No box background — the panel cell is the container. Action is the
+ * typographic hero; pill is the visual hero (force-tint at full strength).
+ * Force tints CVD-safe per §9:
+ *   advisory  #E8F1F8  pale blue
+ *   strong    #BFD3E6  mid blue
+ *   mandatory #F2C5A3  vermillion-tinted
+ *   blocking  #D55E00  deep vermillion (white text inside the pill)
+ */
+.cascade .output .cue-action {
+  font-size: 22px;
+  font-weight: 700;
+  fill: #1F3D5C;
+  letter-spacing: 0.02em;
+}
+
+.cascade .output .cue-via {
+  font-size: 10px;
+  fill: #888888;
+  font-style: italic;
+}
+
+.cascade .output .force-pill { stroke: none; }
+.cascade .output .force-pill[data-force="advisory"]  { fill: #E8F1F8; }
+.cascade .output .force-pill[data-force="strong"]    { fill: #BFD3E6; }
+.cascade .output .force-pill[data-force="mandatory"] { fill: #F2C5A3; }
+.cascade .output .force-pill[data-force="blocking"]  { fill: #D55E00; }
+
+.cascade .output .force-word {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.cascade .output .force-word[data-force="advisory"]  { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="strong"]    { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="mandatory"] { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="blocking"]  { fill: #FFFFFF; }
+
+
+/* --- On-demand text (signal label only; rationale is always-visible via
+       band-rationale, and the rule id is debugging-only — kept in
+       data-rationale on the band group but not visually rendered). --- */
+.cascade .on-demand-signal    { font-size: 10px; font-style: italic; fill: #555555; }
+
+/* --- Always-visible band rationale (fired bands only, both reveal modes) ---
+ * Pulls visual weight onto the cascade where the contribution lives.
+ * Fired bands get a rationale line directly under their class label so
+ * the reader sees *what* fired, not just *that* it fired.
+ */
+.cascade .band-rationale {
+  font-size: 11px;
+  fill: #333333;
+}
+
+/* --- Mute unfired bands ---
+ * Per the 2e cascade review: unfired bands are reference material
+ * ("the system considered this and it didn't fire"), not primary content.
+ * Dropping their opacity lets fired bands dominate the visual hierarchy
+ * — mirrors Panel 2's detected-rail / undetected-list distinction.
+ */
+.cascade .band[data-fired="false"] { opacity: 0.45; }
+.cascade .band[data-fired="false"] .band-label { fill: #555555; }
+</style>
+  <style>
+  /* Panel 1 chrome */
+  .case-input .section-label { font-size: 13px; }
+  .case-input .domain-tag { font-size: 13px; }
+  .case-input .threshold-label { font-size: 13px; }
+  .case-input .case-description { font-size: 13px; }
+  .interval-bar .endpoint-label { font-size: 13px; }
+  /* Panel 2 signals */
+  .signals .signal-label { font-size: 13px; }
+  .signals .signal-detail { font-size: 12px; }
+  /* Panel 3 cascade — band labels stay 14px; bump everything else small */
+  .cascade .band-rationale { font-size: 12px; }
+  .cascade .on-demand-signal { font-size: 11px; }
+  .cascade .strip-cell-label { font-size: 12px; }
+  .cascade .safety-detail { font-size: 11px; }
+</style>
+  <text x="8" y="16" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#212121">(a)</text>
+  <text x="248" y="16" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#212121">(b)</text>
+  <text x="528" y="16" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#212121">(c)</text>
+  <text x="120" y="44" text-anchor="middle" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#1F3D5C" letter-spacing="0.06em">CONFIDENCE-ONLY</text>
+  <text x="380" y="44" text-anchor="middle" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#1F3D5C" letter-spacing="0.06em">UNCERTAINTY DISPLAY</text>
+  <text x="800" y="44" text-anchor="middle" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#1F3D5C" letter-spacing="0.06em">ACTIONCUE</text>
+  <line x1="240" y1="0" x2="240" y2="582" stroke="#D0D0D0" stroke-width="1" />
+  <line x1="520" y1="0" x2="520" y2="582" stroke="#D0D0D0" stroke-width="1" />
+  <g transform="translate(0, 0)">
+<svg viewBox="0 0 240 582" width="240" height="582" xmlns="http://www.w3.org/2000/svg">
+  <g class="conf-only-card" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif">
+    <text x="120" y="100" text-anchor="middle" font-size="13" fill="#555555" letter-spacing="0.04em">AI RISK SCORE</text>
+    <text x="120" y="349" text-anchor="middle" font-size="48" font-weight="700" fill="#1F3D5C">0.62</text>
+    <text x="120" y="385" text-anchor="middle" font-size="14" fill="#888888">Decision threshold: 0.60</text>
+  </g>
+</svg>
+  </g>
+  <g transform="translate(240, 0)">
+<svg viewBox="0 0 280 582" width="280" height="582" xmlns="http://www.w3.org/2000/svg">
+  <text x="140" y="253" text-anchor="middle" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="700" fill="#1F3D5C">0.62</text>
+  <g transform="translate(0, 271)">
+<svg viewBox="0 0 280 80" width="280" height="80" class="interval-bar" xmlns="http://www.w3.org/2000/svg">
+  <style>/*
+ * Scoped stylesheet for Panel 1 (case input) and the standalone
+ * interval bar. Two scopes:
+ *
+ *   .case-input    panel-level rules: identity strip, section labels,
+ *                  description, threshold callout.
+ *   .interval-bar  the bar's own rules: track, shaded band, threshold
+ *                  tick, score marker, endpoint labels.
+ *
+ * The bar is scoped separately so render_interval_bar() can be
+ * rendered standalone (used directly in the three-way comparison's
+ * middle column in 2e) without depending on .case-input.
+ *
+ * Palette stays in the CVD-safe family established in 2b:
+ *   deep blue   #1F3D5C  primary text / score marker
+ *   mid blue    #5B8AB8  interval band, secondary accents
+ *   pale blue   #BFD3E6  fired/active tint
+ *   vermillion  #D55E00  threshold tick (high-attention, single hue)
+ *   neutrals    #FAFAFA #E0E0E0 #555555 #212121
+ */
+
+.case-input text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+
+/* --- Identity strip --- */
+.case-input .case-badge {
+  fill: #1F3D5C;
+  stroke: none;
+}
+.case-input .case-badge-id  { fill: #FFFFFF; font-size: 13px; font-weight: bold; }
+.case-input .domain-tag     { font-size: 12px; fill: #555555; }
+
+/* --- Section label above the bar --- */
+.case-input .section-label  { font-size: 11px; fill: #555555; letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* --- Score value floating above its marker --- */
+.case-input .score-value    { font-size: 18px; font-weight: bold; fill: #1F3D5C; }
+
+/* --- Threshold label below the threshold tick --- */
+.case-input .threshold-label{ font-size: 10px; fill: #D55E00; font-weight: bold; }
+
+/* --- Description (free-text context, smallest weight) --- */
+.case-input .case-description { font-size: 12px; fill: #333333; }
+
+/* --- Interval bar (scoped separately so it works standalone) --- */
+.interval-bar text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #555555;
+}
+.interval-bar .bar-track     { fill: #E0E0E0; }
+.interval-bar .bar-interval  { fill: #BFD3E6; }
+.interval-bar .threshold-tick { stroke: #D55E00; stroke-width: 2; fill: none; }
+.interval-bar .score-marker  { fill: #1F3D5C; stroke: #FFFFFF; stroke-width: 1.5; }
+.interval-bar .endpoint-label { font-size: 9px; }
+</style>
+  <rect class="bar-track" x="12" y="22" width="256" height="8" rx="2" />
+  <rect class="bar-interval" x="153" y="22" width="36" height="8" rx="2" />
+  <line class="threshold-tick" x1="166" y1="16" x2="166" y2="36" />
+  <circle class="score-marker" cx="171" cy="26" r="5" />
+  <text class="endpoint-label" x="12" y="50" text-anchor="start">0.0</text>
+  <text class="endpoint-label" x="268" y="50" text-anchor="end">1.0</text>
+</svg>
+  </g>
+</svg>
+  </g>
+  <g transform="translate(520, 76)">
+<svg viewBox="0 0 560 486" width="560" height="486" class="cascade" data-reveal="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="cascade-arrowhead" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+    </marker>
+  </defs>
+  
+  <g class="back-references"></g>
+  <g class="cascade-bands">
+    <g class="band" data-class="validity" data-fired="false" data-winner="false">
+      <rect class="band-bg" x="40" y="20" width="320" height="80" />
+      <rect class="band-accent" x="40" y="20" width="6" height="80" />
+      <text class="band-label" x="54" y="50">Validity</text>
+      
+      <g class="status">
+        <circle cx="340" cy="60" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        
+      </g>
+    </g>
+    <g class="band" data-class="completion" data-fired="true" data-winner="true" data-rationale="Critical inputs missing: oxygen saturation." data-signal-label="Missing critical data">
+      <rect class="band-bg" x="40" y="110" width="320" height="80" />
+      <rect class="band-accent" x="40" y="110" width="6" height="80" />
+      <text class="band-label" x="54" y="140">Completion</text>
+      <text class="band-rationale" x="54" y="158"><tspan x="54" dy="0">Critical inputs missing: oxygen saturation.</tspan></text>
+      <g class="status">
+        <circle cx="340" cy="150" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        <text class="on-demand-signal" x="54" y="175">from signal: Missing critical data</text>
+      </g>
+    </g>
+    <g class="band" data-class="sensitivity" data-fired="true" data-winner="false" data-rationale="Risk interval (0.55–0.69) crosses the action threshold (0.60)." data-signal-label="Interval crosses threshold">
+      <rect class="band-bg" x="40" y="200" width="320" height="80" />
+      <rect class="band-accent" x="40" y="200" width="6" height="80" />
+      <text class="band-label" x="54" y="230">Sensitivity</text>
+      <text class="band-rationale" x="54" y="248"><tspan x="54" dy="0">Risk interval (0.55–0.69) crosses the action</tspan><tspan x="54" dy="11">threshold (0.60).</tspan></text>
+      <g class="status">
+        <circle cx="340" cy="240" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        <text class="on-demand-signal" x="54" y="276">from signal: Interval crosses threshold</text>
+      </g>
+    </g>
+    <g class="band" data-class="interpretation" data-fired="false" data-winner="false">
+      <rect class="band-bg" x="40" y="290" width="320" height="80" />
+      <rect class="band-accent" x="40" y="290" width="6" height="80" />
+      <text class="band-label" x="54" y="320">Interpretation</text>
+      
+      <g class="status">
+        <circle cx="340" cy="330" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        
+      </g>
+    </g>
+  </g>
+  <g class="resolution">
+    <path class="resolution-arrow" data-tip="highest-precedence fired class wins" d="M 360 150 L 390 150 L 390 194 L 420 194" marker-end="url(#cascade-arrowhead)" />
+  </g>
+  <g class="output" data-force="mandatory">
+    <text class="cue-action" x="490" y="168" text-anchor="middle">COMPLETE</text>
+    <rect class="force-pill" data-force="mandatory" x="432" y="182" width="116" height="24" rx="12" />
+    <text class="force-word" data-force="mandatory" x="490" y="198" text-anchor="middle">MANDATORY</text>
+    <text class="cue-via" x="490" y="224" text-anchor="middle">via completion</text>
+  </g>
+  <g class="force-strip">
+    <g class="strip-cell" data-level="advisory" data-active="false"><rect class="strip-cell-bg" data-level="advisory" x="34" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="94" y="392" text-anchor="middle">advisory</text></g>
+    <g class="strip-cell" data-level="strong" data-active="false"><rect class="strip-cell-bg" data-level="strong" x="158" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="218" y="392" text-anchor="middle">strong</text></g>
+    <g class="strip-cell" data-level="mandatory" data-active="true"><rect class="strip-cell-bg" data-level="mandatory" x="282" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="342" y="392" text-anchor="middle">mandatory</text></g>
+    <g class="strip-cell" data-level="blocking" data-active="false"><rect class="strip-cell-bg" data-level="blocking" x="406" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="466" y="392" text-anchor="middle">blocking</text></g>
+  </g>
+
+</svg>
+  </g>
+</svg>
+  </section>
+  <section>
+    <h2>Figure 3 — Panel 3 detailed (Case C, reveal=all)</h2>
+    <svg viewBox="0 0 720 500" width="720" height="500" class="cascade" data-reveal="all" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="cascade-arrowhead" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+    </marker>
+  </defs>
+  <style>/*
+ * Scoped stylesheet for the ActionCue cascade renderer.
+ *
+ * All selectors are prefixed `.cascade` so multiple cascades on the
+ * same page (Week 3 three-way comparison) do not bleed styles.
+ *
+ * The palette is a deliberate deviation from SPEC.md §6 / §9 colors:
+ * every ordinal axis (force gradient) is encoded by luminance, and
+ * every categorical axis (class accents) uses Wong palette hues.
+ * This makes the design robust under protanopia, deuteranopia, and
+ * tritanopia.
+ */
+
+.cascade text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+.cascade .band-label { font-size: 14px; }
+.cascade .on-demand text { font-size: 12px; }
+
+/* --- Band background --- */
+.cascade .band-bg {
+  fill: #FFFFFF;
+  stroke: #D0D0D0;
+  stroke-width: 1;
+  rx: 4;
+}
+.cascade .band[data-fired="true"]  .band-bg { fill: #FAFAFA; }
+.cascade .band[data-winner="true"] .band-bg {
+  stroke: #000000;
+  stroke-width: 2;
+  fill: #F5F5F5;
+}
+
+/* --- Class accent stripe (categorical, Wong palette) --- */
+.cascade .band[data-class="validity"]       .band-accent { fill: #D55E00; }
+.cascade .band[data-class="completion"]     .band-accent { fill: #009E73; }
+.cascade .band[data-class="sensitivity"]    .band-accent { fill: #CC79A7; }
+.cascade .band[data-class="interpretation"] .band-accent { fill: #0072B2; }
+
+/* --- On-demand reveal layer --- */
+.cascade .band .on-demand {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease-out;
+}
+.cascade .band[data-expanded="true"] .on-demand { opacity: 1; }
+.cascade[data-reveal="all"] .band[data-fired="true"] .on-demand { opacity: 1; }
+
+.cascade .band:hover .band-bg { stroke-width: 2; cursor: pointer; }
+
+/* --- Status dot --- */
+.cascade .band .status circle { stroke: #000000; stroke-width: 1.5; }
+.cascade .band[data-fired="true"]  .status circle { fill: #000000; }
+.cascade .band[data-fired="false"] .status circle { fill: #FFFFFF; }
+
+/* --- Resolution arrow --- */
+.cascade .resolution-arrow {
+  stroke: #000000;
+  stroke-width: 2;
+  fill: none;
+}
+.cascade .resolution-label { font-size: 10px; fill: #555555; }
+
+/* --- Horizontal force strip (replaces the old vertical force scale) ---
+ * Four ordinal cells (advisory → strong → mandatory → blocking) read as a
+ * vocabulary axis. Active cell takes the force tint at full strength + a
+ * bold dark-blue label (white text on the deepest tint for contrast).
+ * Inactive cells stay muted neutral.
+ */
+.cascade .force-strip .strip-cell-bg {
+  fill: #F4F4F4;
+  stroke: #E0E0E0;
+  stroke-width: 1;
+}
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="advisory"]  { fill: #E8F1F8; stroke: #BFD3E6; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="strong"]    { fill: #BFD3E6; stroke: #5B8AB8; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="mandatory"] { fill: #F2C5A3; stroke: #D55E00; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="blocking"]  { fill: #D55E00; stroke: #1F3D5C; }
+
+.cascade .force-strip .strip-cell-label {
+  font-size: 11px;
+  fill: #888888;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-label { fill: #1F3D5C; font-weight: 700; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="blocking"] + .strip-cell-label,
+.cascade .force-strip .strip-cell[data-active="true"][data-level="blocking"] .strip-cell-label { fill: #FFFFFF; }
+
+/* --- Safety lift arrow under the strip (visual only; textual rationale
+       lives in the safety banner below) --- */
+.cascade .force-strip .strip-safety-arrow {
+  stroke: #D55E00;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* --- Safety banner (vermillion accent strip + textual rationale) ---
+ * Vermillion across the cascade always means "needs attention" — visual
+ * rhyme with the threshold tick in Panel 1 and detected signals in Panel 2.
+ */
+.cascade .safety-banner .safety-bg {
+  fill: #FFF6EF;             /* very pale vermillion wash */
+  stroke: #F2C5A3;
+  stroke-width: 1;
+}
+.cascade .safety-banner .safety-accent {
+  fill: #D55E00;
+}
+.cascade .safety-banner .safety-title {
+  font-size: 11px;
+  font-weight: 600;
+  fill: #1F3D5C;
+}
+.cascade .safety-banner .safety-detail {
+  font-size: 10px;
+  fill: #555555;
+}
+
+/* --- Output box (canonical cue display: action + force pill + via caption) ---
+ * No box background — the panel cell is the container. Action is the
+ * typographic hero; pill is the visual hero (force-tint at full strength).
+ * Force tints CVD-safe per §9:
+ *   advisory  #E8F1F8  pale blue
+ *   strong    #BFD3E6  mid blue
+ *   mandatory #F2C5A3  vermillion-tinted
+ *   blocking  #D55E00  deep vermillion (white text inside the pill)
+ */
+.cascade .output .cue-action {
+  font-size: 22px;
+  font-weight: 700;
+  fill: #1F3D5C;
+  letter-spacing: 0.02em;
+}
+
+.cascade .output .cue-via {
+  font-size: 10px;
+  fill: #888888;
+  font-style: italic;
+}
+
+.cascade .output .force-pill { stroke: none; }
+.cascade .output .force-pill[data-force="advisory"]  { fill: #E8F1F8; }
+.cascade .output .force-pill[data-force="strong"]    { fill: #BFD3E6; }
+.cascade .output .force-pill[data-force="mandatory"] { fill: #F2C5A3; }
+.cascade .output .force-pill[data-force="blocking"]  { fill: #D55E00; }
+
+.cascade .output .force-word {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.cascade .output .force-word[data-force="advisory"]  { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="strong"]    { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="mandatory"] { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="blocking"]  { fill: #FFFFFF; }
+
+
+/* --- On-demand text (signal label only; rationale is always-visible via
+       band-rationale, and the rule id is debugging-only — kept in
+       data-rationale on the band group but not visually rendered). --- */
+.cascade .on-demand-signal    { font-size: 10px; font-style: italic; fill: #555555; }
+
+/* --- Always-visible band rationale (fired bands only, both reveal modes) ---
+ * Pulls visual weight onto the cascade where the contribution lives.
+ * Fired bands get a rationale line directly under their class label so
+ * the reader sees *what* fired, not just *that* it fired.
+ */
+.cascade .band-rationale {
+  font-size: 11px;
+  fill: #333333;
+}
+
+/* --- Mute unfired bands ---
+ * Per the 2e cascade review: unfired bands are reference material
+ * ("the system considered this and it didn't fire"), not primary content.
+ * Dropping their opacity lets fired bands dominate the visual hierarchy
+ * — mirrors Panel 2's detected-rail / undetected-list distinction.
+ */
+.cascade .band[data-fired="false"] { opacity: 0.45; }
+.cascade .band[data-fired="false"] .band-label { fill: #555555; }
+</style>
+  <g class="back-references"></g>
+  <g class="cascade-bands">
+    <g class="band" data-class="validity" data-fired="false" data-winner="false">
+      <rect class="band-bg" x="40" y="20" width="320" height="80" />
+      <rect class="band-accent" x="40" y="20" width="6" height="80" />
+      <text class="band-label" x="54" y="50">Validity</text>
+      
+      <g class="status">
+        <circle cx="340" cy="60" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        
+      </g>
+    </g>
+    <g class="band" data-class="completion" data-fired="true" data-winner="true" data-rationale="Critical inputs missing: oxygen saturation." data-signal-label="Missing critical data">
+      <rect class="band-bg" x="40" y="110" width="320" height="80" />
+      <rect class="band-accent" x="40" y="110" width="6" height="80" />
+      <text class="band-label" x="54" y="140">Completion</text>
+      <text class="band-rationale" x="54" y="158"><tspan x="54" dy="0">Critical inputs missing: oxygen saturation.</tspan></text>
+      <g class="status">
+        <circle cx="340" cy="150" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        <text class="on-demand-signal" x="54" y="175">from signal: Missing critical data</text>
+      </g>
+    </g>
+    <g class="band" data-class="sensitivity" data-fired="true" data-winner="false" data-rationale="Risk interval (0.55–0.69) crosses the action threshold (0.60)." data-signal-label="Interval crosses threshold">
+      <rect class="band-bg" x="40" y="200" width="320" height="80" />
+      <rect class="band-accent" x="40" y="200" width="6" height="80" />
+      <text class="band-label" x="54" y="230">Sensitivity</text>
+      <text class="band-rationale" x="54" y="248"><tspan x="54" dy="0">Risk interval (0.55–0.69) crosses the action</tspan><tspan x="54" dy="11">threshold (0.60).</tspan></text>
+      <g class="status">
+        <circle cx="340" cy="240" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        <text class="on-demand-signal" x="54" y="276">from signal: Interval crosses threshold</text>
+      </g>
+    </g>
+    <g class="band" data-class="interpretation" data-fired="false" data-winner="false">
+      <rect class="band-bg" x="40" y="290" width="320" height="80" />
+      <rect class="band-accent" x="40" y="290" width="6" height="80" />
+      <text class="band-label" x="54" y="320">Interpretation</text>
+      
+      <g class="status">
+        <circle cx="340" cy="330" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        
+      </g>
+    </g>
+  </g>
+  <g class="resolution">
+    <path class="resolution-arrow" data-tip="highest-precedence fired class wins" d="M 360 150 L 390 150 L 390 194 L 420 194" marker-end="url(#cascade-arrowhead)" />
+  </g>
+  <g class="output" data-force="mandatory">
+    <text class="cue-action" x="490" y="168" text-anchor="middle">COMPLETE</text>
+    <rect class="force-pill" data-force="mandatory" x="432" y="182" width="116" height="24" rx="12" />
+    <text class="force-word" data-force="mandatory" x="490" y="198" text-anchor="middle">MANDATORY</text>
+    <text class="cue-via" x="490" y="224" text-anchor="middle">via completion</text>
+  </g>
+  <g class="force-strip">
+    <g class="strip-cell" data-level="advisory" data-active="false"><rect class="strip-cell-bg" data-level="advisory" x="114" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="174" y="392" text-anchor="middle">advisory</text></g>
+    <g class="strip-cell" data-level="strong" data-active="false"><rect class="strip-cell-bg" data-level="strong" x="238" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="298" y="392" text-anchor="middle">strong</text></g>
+    <g class="strip-cell" data-level="mandatory" data-active="true"><rect class="strip-cell-bg" data-level="mandatory" x="362" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="422" y="392" text-anchor="middle">mandatory</text></g>
+    <g class="strip-cell" data-level="blocking" data-active="false"><rect class="strip-cell-bg" data-level="blocking" x="486" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="546" y="392" text-anchor="middle">blocking</text></g>
+  </g>
+
+</svg>
+  </section>
+  <section>
+    <h2>Figure 4a — generativity (Case A, healthcare, no rules fire)</h2>
+    <svg viewBox="0 0 720 760" width="720" height="760" class="four-panel" xmlns="http://www.w3.org/2000/svg">
+  <style>/*
+ * Scoped stylesheet for Panel 1 (case input) and the standalone
+ * interval bar. Two scopes:
+ *
+ *   .case-input    panel-level rules: identity strip, section labels,
+ *                  description, threshold callout.
+ *   .interval-bar  the bar's own rules: track, shaded band, threshold
+ *                  tick, score marker, endpoint labels.
+ *
+ * The bar is scoped separately so render_interval_bar() can be
+ * rendered standalone (used directly in the three-way comparison's
+ * middle column in 2e) without depending on .case-input.
+ *
+ * Palette stays in the CVD-safe family established in 2b:
+ *   deep blue   #1F3D5C  primary text / score marker
+ *   mid blue    #5B8AB8  interval band, secondary accents
+ *   pale blue   #BFD3E6  fired/active tint
+ *   vermillion  #D55E00  threshold tick (high-attention, single hue)
+ *   neutrals    #FAFAFA #E0E0E0 #555555 #212121
+ */
+
+.case-input text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+
+/* --- Identity strip --- */
+.case-input .case-badge {
+  fill: #1F3D5C;
+  stroke: none;
+}
+.case-input .case-badge-id  { fill: #FFFFFF; font-size: 13px; font-weight: bold; }
+.case-input .domain-tag     { font-size: 12px; fill: #555555; }
+
+/* --- Section label above the bar --- */
+.case-input .section-label  { font-size: 11px; fill: #555555; letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* --- Score value floating above its marker --- */
+.case-input .score-value    { font-size: 18px; font-weight: bold; fill: #1F3D5C; }
+
+/* --- Threshold label below the threshold tick --- */
+.case-input .threshold-label{ font-size: 10px; fill: #D55E00; font-weight: bold; }
+
+/* --- Description (free-text context, smallest weight) --- */
+.case-input .case-description { font-size: 12px; fill: #333333; }
+
+/* --- Interval bar (scoped separately so it works standalone) --- */
+.interval-bar text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #555555;
+}
+.interval-bar .bar-track     { fill: #E0E0E0; }
+.interval-bar .bar-interval  { fill: #BFD3E6; }
+.interval-bar .threshold-tick { stroke: #D55E00; stroke-width: 2; fill: none; }
+.interval-bar .score-marker  { fill: #1F3D5C; stroke: #FFFFFF; stroke-width: 1.5; }
+.interval-bar .endpoint-label { font-size: 9px; }
+
+
+/*
+ * Scoped stylesheet for Panel 2 (uncertainty signals).
+ * Single top-level scope: .signals
+ *
+ * Two visual modes per row, switched by data-detected:
+ *   data-detected="true"  -> rail row: vermillion accent, filled indicator,
+ *                            weighty label, detail line shown
+ *   data-detected="false" -> list row: hollow indicator, muted label, no detail
+ *
+ * Two indicator shapes per row, switched by data-kind:
+ *   data-kind="detection" -> circle visible, triangle hidden
+ *   data-kind="context"   -> triangle visible, circle hidden
+ *
+ * Palette stays in the CVD-safe family locked in 2b:
+ *   vermillion #D55E00  detected accent strip + filled indicator
+ *   deep blue  #1F3D5C  detected label text
+ *   neutrals   #555555 #888888 #999999 #E0E0E0  undetected / dividers
+ */
+
+.signals text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+
+/* --- Section label --- */
+.signals .section-label {
+  font-size: 11px;
+  fill: #555555;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* --- Detected rail --- */
+.signals .rail-accent {
+  fill: #D55E00;
+}
+
+.signals .signal-row[data-detected="true"] .signal-indicator {
+  fill: #D55E00;
+  stroke: none;
+}
+
+.signals .signal-row[data-detected="true"] .signal-label {
+  font-size: 12px;
+  font-weight: 600;
+  fill: #1F3D5C;
+}
+
+.signals .signal-row[data-detected="true"] .signal-detail {
+  font-size: 10px;
+  fill: #555555;
+}
+
+/* --- Undetected list --- */
+.signals .signal-row[data-detected="false"] .signal-indicator {
+  fill: none;
+  stroke: #999999;
+  stroke-width: 1;
+}
+
+.signals .signal-row[data-detected="false"] .signal-label {
+  font-size: 11px;
+  fill: #888888;
+}
+
+/* --- Indicator shape swap by kind --- */
+.signals .signal-row[data-kind="detection"] polygon.signal-indicator {
+  display: none;
+}
+
+.signals .signal-row[data-kind="context"] circle.signal-indicator {
+  display: none;
+}
+
+/* --- Divider between rail and list --- */
+.signals .undetected-divider {
+  stroke: #E0E0E0;
+  stroke-dasharray: 2 3;
+  stroke-width: 1;
+}
+
+.signals .undetected-caption {
+  font-size: 9px;
+  fill: #999999;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+
+/*
+ * Scoped stylesheet for the ActionCue cascade renderer.
+ *
+ * All selectors are prefixed `.cascade` so multiple cascades on the
+ * same page (Week 3 three-way comparison) do not bleed styles.
+ *
+ * The palette is a deliberate deviation from SPEC.md §6 / §9 colors:
+ * every ordinal axis (force gradient) is encoded by luminance, and
+ * every categorical axis (class accents) uses Wong palette hues.
+ * This makes the design robust under protanopia, deuteranopia, and
+ * tritanopia.
+ */
+
+.cascade text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+.cascade .band-label { font-size: 14px; }
+.cascade .on-demand text { font-size: 12px; }
+
+/* --- Band background --- */
+.cascade .band-bg {
+  fill: #FFFFFF;
+  stroke: #D0D0D0;
+  stroke-width: 1;
+  rx: 4;
+}
+.cascade .band[data-fired="true"]  .band-bg { fill: #FAFAFA; }
+.cascade .band[data-winner="true"] .band-bg {
+  stroke: #000000;
+  stroke-width: 2;
+  fill: #F5F5F5;
+}
+
+/* --- Class accent stripe (categorical, Wong palette) --- */
+.cascade .band[data-class="validity"]       .band-accent { fill: #D55E00; }
+.cascade .band[data-class="completion"]     .band-accent { fill: #009E73; }
+.cascade .band[data-class="sensitivity"]    .band-accent { fill: #CC79A7; }
+.cascade .band[data-class="interpretation"] .band-accent { fill: #0072B2; }
+
+/* --- On-demand reveal layer --- */
+.cascade .band .on-demand {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease-out;
+}
+.cascade .band[data-expanded="true"] .on-demand { opacity: 1; }
+.cascade[data-reveal="all"] .band[data-fired="true"] .on-demand { opacity: 1; }
+
+.cascade .band:hover .band-bg { stroke-width: 2; cursor: pointer; }
+
+/* --- Status dot --- */
+.cascade .band .status circle { stroke: #000000; stroke-width: 1.5; }
+.cascade .band[data-fired="true"]  .status circle { fill: #000000; }
+.cascade .band[data-fired="false"] .status circle { fill: #FFFFFF; }
+
+/* --- Resolution arrow --- */
+.cascade .resolution-arrow {
+  stroke: #000000;
+  stroke-width: 2;
+  fill: none;
+}
+.cascade .resolution-label { font-size: 10px; fill: #555555; }
+
+/* --- Horizontal force strip (replaces the old vertical force scale) ---
+ * Four ordinal cells (advisory → strong → mandatory → blocking) read as a
+ * vocabulary axis. Active cell takes the force tint at full strength + a
+ * bold dark-blue label (white text on the deepest tint for contrast).
+ * Inactive cells stay muted neutral.
+ */
+.cascade .force-strip .strip-cell-bg {
+  fill: #F4F4F4;
+  stroke: #E0E0E0;
+  stroke-width: 1;
+}
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="advisory"]  { fill: #E8F1F8; stroke: #BFD3E6; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="strong"]    { fill: #BFD3E6; stroke: #5B8AB8; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="mandatory"] { fill: #F2C5A3; stroke: #D55E00; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="blocking"]  { fill: #D55E00; stroke: #1F3D5C; }
+
+.cascade .force-strip .strip-cell-label {
+  font-size: 11px;
+  fill: #888888;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-label { fill: #1F3D5C; font-weight: 700; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="blocking"] + .strip-cell-label,
+.cascade .force-strip .strip-cell[data-active="true"][data-level="blocking"] .strip-cell-label { fill: #FFFFFF; }
+
+/* --- Safety lift arrow under the strip (visual only; textual rationale
+       lives in the safety banner below) --- */
+.cascade .force-strip .strip-safety-arrow {
+  stroke: #D55E00;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* --- Safety banner (vermillion accent strip + textual rationale) ---
+ * Vermillion across the cascade always means "needs attention" — visual
+ * rhyme with the threshold tick in Panel 1 and detected signals in Panel 2.
+ */
+.cascade .safety-banner .safety-bg {
+  fill: #FFF6EF;             /* very pale vermillion wash */
+  stroke: #F2C5A3;
+  stroke-width: 1;
+}
+.cascade .safety-banner .safety-accent {
+  fill: #D55E00;
+}
+.cascade .safety-banner .safety-title {
+  font-size: 11px;
+  font-weight: 600;
+  fill: #1F3D5C;
+}
+.cascade .safety-banner .safety-detail {
+  font-size: 10px;
+  fill: #555555;
+}
+
+/* --- Output box (canonical cue display: action + force pill + via caption) ---
+ * No box background — the panel cell is the container. Action is the
+ * typographic hero; pill is the visual hero (force-tint at full strength).
+ * Force tints CVD-safe per §9:
+ *   advisory  #E8F1F8  pale blue
+ *   strong    #BFD3E6  mid blue
+ *   mandatory #F2C5A3  vermillion-tinted
+ *   blocking  #D55E00  deep vermillion (white text inside the pill)
+ */
+.cascade .output .cue-action {
+  font-size: 22px;
+  font-weight: 700;
+  fill: #1F3D5C;
+  letter-spacing: 0.02em;
+}
+
+.cascade .output .cue-via {
+  font-size: 10px;
+  fill: #888888;
+  font-style: italic;
+}
+
+.cascade .output .force-pill { stroke: none; }
+.cascade .output .force-pill[data-force="advisory"]  { fill: #E8F1F8; }
+.cascade .output .force-pill[data-force="strong"]    { fill: #BFD3E6; }
+.cascade .output .force-pill[data-force="mandatory"] { fill: #F2C5A3; }
+.cascade .output .force-pill[data-force="blocking"]  { fill: #D55E00; }
+
+.cascade .output .force-word {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.cascade .output .force-word[data-force="advisory"]  { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="strong"]    { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="mandatory"] { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="blocking"]  { fill: #FFFFFF; }
+
+
+/* --- On-demand text (signal label only; rationale is always-visible via
+       band-rationale, and the rule id is debugging-only — kept in
+       data-rationale on the band group but not visually rendered). --- */
+.cascade .on-demand-signal    { font-size: 10px; font-style: italic; fill: #555555; }
+
+/* --- Always-visible band rationale (fired bands only, both reveal modes) ---
+ * Pulls visual weight onto the cascade where the contribution lives.
+ * Fired bands get a rationale line directly under their class label so
+ * the reader sees *what* fired, not just *that* it fired.
+ */
+.cascade .band-rationale {
+  font-size: 11px;
+  fill: #333333;
+}
+
+/* --- Mute unfired bands ---
+ * Per the 2e cascade review: unfired bands are reference material
+ * ("the system considered this and it didn't fire"), not primary content.
+ * Dropping their opacity lets fired bands dominate the visual hierarchy
+ * — mirrors Panel 2's detected-rail / undetected-list distinction.
+ */
+.cascade .band[data-fired="false"] { opacity: 0.45; }
+.cascade .band[data-fired="false"] .band-label { fill: #555555; }
+</style>
+  <g transform="translate(0, 0)">
+<svg viewBox="0 0 360 240" width="360" height="240" class="case-input" xmlns="http://www.w3.org/2000/svg">
+  
+  <rect class="case-badge" x="16" y="10" width="26" height="22" rx="4" />
+  <text class="case-badge-id" x="29" y="26" text-anchor="middle">A</text>
+  <text class="domain-tag" x="50" y="24">healthcare</text>
+  <text class="section-label" x="16" y="58">AI risk score</text>
+  <text class="score-value" x="277" y="90" text-anchor="middle">0.82</text>
+  <g transform="translate(16, 100)">
+<svg viewBox="0 0 328 56" width="328" height="56" class="interval-bar" xmlns="http://www.w3.org/2000/svg">
+  
+  <rect class="bar-track" x="12" y="22" width="304" height="8" rx="2" />
+  <rect class="bar-interval" x="249" y="22" width="24" height="8" rx="2" />
+  <line class="threshold-tick" x1="194" y1="16" x2="194" y2="36" />
+  <circle class="score-marker" cx="261" cy="26" r="5" />
+  <text class="endpoint-label" x="12" y="50" text-anchor="start">0.0</text>
+  <text class="endpoint-label" x="316" y="50" text-anchor="end">1.0</text>
+</svg>
+  </g>
+  <text class="threshold-label" x="210" y="158" text-anchor="middle">Threshold 0.60</text>
+  <text class="case-description" x="16" y="188"><tspan x="16" dy="0">Patient with stable vitals, complete record, profile</tspan><tspan x="16" dy="14">within validated population.</tspan></text>
+</svg>
+  </g>
+  <g transform="translate(360, 0)">
+<svg viewBox="0 0 360 240" width="360" height="240" class="signals" xmlns="http://www.w3.org/2000/svg">
+  
+  <text class="section-label" x="16" y="20">UNCERTAINTY SIGNALS</text>
+
+  <g class="undetected-divider-group">
+    <text class="undetected-caption" x="16" y="44">not detected</text>
+    <line class="undetected-divider" x1="16" y1="48" x2="344" y2="48" />
+  </g>
+  <g class="signal-row" id="signal-row-missing_critical_data" data-detected="false" data-kind="detection">
+    <circle class="signal-indicator" cx="22" cy="71" r="4" /><polygon class="signal-indicator" points="22,67 18,75 26,75" />
+    <text class="signal-label" x="32" y="74">Missing critical data</text>
+  </g>
+  <g class="signal-row" id="signal-row-out_of_scope" data-detected="false" data-kind="detection">
+    <circle class="signal-indicator" cx="22" cy="89" r="4" /><polygon class="signal-indicator" points="22,85 18,93 26,93" />
+    <text class="signal-label" x="32" y="92">Out of scope</text>
+  </g>
+  <g class="signal-row" id="signal-row-threshold_crossing" data-detected="false" data-kind="detection">
+    <circle class="signal-indicator" cx="22" cy="107" r="4" /><polygon class="signal-indicator" points="22,103 18,111 26,111" />
+    <text class="signal-label" x="32" y="110">Interval crosses threshold</text>
+  </g>
+  <g class="signal-row" id="signal-row-explanation_instability" data-detected="false" data-kind="detection">
+    <circle class="signal-indicator" cx="22" cy="125" r="4" /><polygon class="signal-indicator" points="22,121 18,129 26,129" />
+    <text class="signal-label" x="32" y="128">Explanation instability</text>
+  </g>
+  <g class="signal-row" id="signal-row-decision_context" data-detected="false" data-kind="context">
+    <circle class="signal-indicator" cx="22" cy="143" r="4" /><polygon class="signal-indicator" points="22,139 18,147 26,147" />
+    <text class="signal-label" x="32" y="146">Decision context</text>
+  </g>
+</svg>
+  </g>
+  <g transform="translate(0, 240)">
+<svg viewBox="0 0 720 520" width="720" height="520" class="cascade" data-reveal="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="cascade-arrowhead" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+    </marker>
+  </defs>
+  
+  <g class="back-references"></g>
+  <g class="cascade-bands">
+    <g class="band" data-class="validity" data-fired="false" data-winner="false">
+      <rect class="band-bg" x="40" y="20" width="320" height="80" />
+      <rect class="band-accent" x="40" y="20" width="6" height="80" />
+      <text class="band-label" x="54" y="50">Validity</text>
+      
+      <g class="status">
+        <circle cx="340" cy="60" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        
+      </g>
+    </g>
+    <g class="band" data-class="completion" data-fired="false" data-winner="false">
+      <rect class="band-bg" x="40" y="110" width="320" height="80" />
+      <rect class="band-accent" x="40" y="110" width="6" height="80" />
+      <text class="band-label" x="54" y="140">Completion</text>
+      
+      <g class="status">
+        <circle cx="340" cy="150" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        
+      </g>
+    </g>
+    <g class="band" data-class="sensitivity" data-fired="false" data-winner="false">
+      <rect class="band-bg" x="40" y="200" width="320" height="80" />
+      <rect class="band-accent" x="40" y="200" width="6" height="80" />
+      <text class="band-label" x="54" y="230">Sensitivity</text>
+      
+      <g class="status">
+        <circle cx="340" cy="240" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        
+      </g>
+    </g>
+    <g class="band" data-class="interpretation" data-fired="false" data-winner="false">
+      <rect class="band-bg" x="40" y="290" width="320" height="80" />
+      <rect class="band-accent" x="40" y="290" width="6" height="80" />
+      <text class="band-label" x="54" y="320">Interpretation</text>
+      
+      <g class="status">
+        <circle cx="340" cy="330" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        
+      </g>
+    </g>
+  </g>
+  <g class="resolution"></g>
+  <g class="output" data-force="advisory">
+    <text class="cue-action" x="490" y="168" text-anchor="middle">PROCEED</text>
+    <rect class="force-pill" data-force="advisory" x="432" y="182" width="116" height="24" rx="12" />
+    <text class="force-word" data-force="advisory" x="490" y="198" text-anchor="middle">ADVISORY</text>
+
+  </g>
+  <g class="force-strip">
+    <g class="strip-cell" data-level="advisory" data-active="true"><rect class="strip-cell-bg" data-level="advisory" x="114" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="174" y="392" text-anchor="middle">advisory</text></g>
+    <g class="strip-cell" data-level="strong" data-active="false"><rect class="strip-cell-bg" data-level="strong" x="238" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="298" y="392" text-anchor="middle">strong</text></g>
+    <g class="strip-cell" data-level="mandatory" data-active="false"><rect class="strip-cell-bg" data-level="mandatory" x="362" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="422" y="392" text-anchor="middle">mandatory</text></g>
+    <g class="strip-cell" data-level="blocking" data-active="false"><rect class="strip-cell-bg" data-level="blocking" x="486" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="546" y="392" text-anchor="middle">blocking</text></g>
+  </g>
+
+</svg>
+  </g>
+</svg>
+  </section>
+  <section>
+    <h2>Figure 4cr — generativity (Case CR, credit, validity wins)</h2>
+    <svg viewBox="0 0 720 760" width="720" height="760" class="four-panel" xmlns="http://www.w3.org/2000/svg">
+  <style>/*
+ * Scoped stylesheet for Panel 1 (case input) and the standalone
+ * interval bar. Two scopes:
+ *
+ *   .case-input    panel-level rules: identity strip, section labels,
+ *                  description, threshold callout.
+ *   .interval-bar  the bar's own rules: track, shaded band, threshold
+ *                  tick, score marker, endpoint labels.
+ *
+ * The bar is scoped separately so render_interval_bar() can be
+ * rendered standalone (used directly in the three-way comparison's
+ * middle column in 2e) without depending on .case-input.
+ *
+ * Palette stays in the CVD-safe family established in 2b:
+ *   deep blue   #1F3D5C  primary text / score marker
+ *   mid blue    #5B8AB8  interval band, secondary accents
+ *   pale blue   #BFD3E6  fired/active tint
+ *   vermillion  #D55E00  threshold tick (high-attention, single hue)
+ *   neutrals    #FAFAFA #E0E0E0 #555555 #212121
+ */
+
+.case-input text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+
+/* --- Identity strip --- */
+.case-input .case-badge {
+  fill: #1F3D5C;
+  stroke: none;
+}
+.case-input .case-badge-id  { fill: #FFFFFF; font-size: 13px; font-weight: bold; }
+.case-input .domain-tag     { font-size: 12px; fill: #555555; }
+
+/* --- Section label above the bar --- */
+.case-input .section-label  { font-size: 11px; fill: #555555; letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* --- Score value floating above its marker --- */
+.case-input .score-value    { font-size: 18px; font-weight: bold; fill: #1F3D5C; }
+
+/* --- Threshold label below the threshold tick --- */
+.case-input .threshold-label{ font-size: 10px; fill: #D55E00; font-weight: bold; }
+
+/* --- Description (free-text context, smallest weight) --- */
+.case-input .case-description { font-size: 12px; fill: #333333; }
+
+/* --- Interval bar (scoped separately so it works standalone) --- */
+.interval-bar text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #555555;
+}
+.interval-bar .bar-track     { fill: #E0E0E0; }
+.interval-bar .bar-interval  { fill: #BFD3E6; }
+.interval-bar .threshold-tick { stroke: #D55E00; stroke-width: 2; fill: none; }
+.interval-bar .score-marker  { fill: #1F3D5C; stroke: #FFFFFF; stroke-width: 1.5; }
+.interval-bar .endpoint-label { font-size: 9px; }
+
+
+/*
+ * Scoped stylesheet for Panel 2 (uncertainty signals).
+ * Single top-level scope: .signals
+ *
+ * Two visual modes per row, switched by data-detected:
+ *   data-detected="true"  -> rail row: vermillion accent, filled indicator,
+ *                            weighty label, detail line shown
+ *   data-detected="false" -> list row: hollow indicator, muted label, no detail
+ *
+ * Two indicator shapes per row, switched by data-kind:
+ *   data-kind="detection" -> circle visible, triangle hidden
+ *   data-kind="context"   -> triangle visible, circle hidden
+ *
+ * Palette stays in the CVD-safe family locked in 2b:
+ *   vermillion #D55E00  detected accent strip + filled indicator
+ *   deep blue  #1F3D5C  detected label text
+ *   neutrals   #555555 #888888 #999999 #E0E0E0  undetected / dividers
+ */
+
+.signals text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+
+/* --- Section label --- */
+.signals .section-label {
+  font-size: 11px;
+  fill: #555555;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* --- Detected rail --- */
+.signals .rail-accent {
+  fill: #D55E00;
+}
+
+.signals .signal-row[data-detected="true"] .signal-indicator {
+  fill: #D55E00;
+  stroke: none;
+}
+
+.signals .signal-row[data-detected="true"] .signal-label {
+  font-size: 12px;
+  font-weight: 600;
+  fill: #1F3D5C;
+}
+
+.signals .signal-row[data-detected="true"] .signal-detail {
+  font-size: 10px;
+  fill: #555555;
+}
+
+/* --- Undetected list --- */
+.signals .signal-row[data-detected="false"] .signal-indicator {
+  fill: none;
+  stroke: #999999;
+  stroke-width: 1;
+}
+
+.signals .signal-row[data-detected="false"] .signal-label {
+  font-size: 11px;
+  fill: #888888;
+}
+
+/* --- Indicator shape swap by kind --- */
+.signals .signal-row[data-kind="detection"] polygon.signal-indicator {
+  display: none;
+}
+
+.signals .signal-row[data-kind="context"] circle.signal-indicator {
+  display: none;
+}
+
+/* --- Divider between rail and list --- */
+.signals .undetected-divider {
+  stroke: #E0E0E0;
+  stroke-dasharray: 2 3;
+  stroke-width: 1;
+}
+
+.signals .undetected-caption {
+  font-size: 9px;
+  fill: #999999;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+
+/*
+ * Scoped stylesheet for the ActionCue cascade renderer.
+ *
+ * All selectors are prefixed `.cascade` so multiple cascades on the
+ * same page (Week 3 three-way comparison) do not bleed styles.
+ *
+ * The palette is a deliberate deviation from SPEC.md §6 / §9 colors:
+ * every ordinal axis (force gradient) is encoded by luminance, and
+ * every categorical axis (class accents) uses Wong palette hues.
+ * This makes the design robust under protanopia, deuteranopia, and
+ * tritanopia.
+ */
+
+.cascade text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+.cascade .band-label { font-size: 14px; }
+.cascade .on-demand text { font-size: 12px; }
+
+/* --- Band background --- */
+.cascade .band-bg {
+  fill: #FFFFFF;
+  stroke: #D0D0D0;
+  stroke-width: 1;
+  rx: 4;
+}
+.cascade .band[data-fired="true"]  .band-bg { fill: #FAFAFA; }
+.cascade .band[data-winner="true"] .band-bg {
+  stroke: #000000;
+  stroke-width: 2;
+  fill: #F5F5F5;
+}
+
+/* --- Class accent stripe (categorical, Wong palette) --- */
+.cascade .band[data-class="validity"]       .band-accent { fill: #D55E00; }
+.cascade .band[data-class="completion"]     .band-accent { fill: #009E73; }
+.cascade .band[data-class="sensitivity"]    .band-accent { fill: #CC79A7; }
+.cascade .band[data-class="interpretation"] .band-accent { fill: #0072B2; }
+
+/* --- On-demand reveal layer --- */
+.cascade .band .on-demand {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease-out;
+}
+.cascade .band[data-expanded="true"] .on-demand { opacity: 1; }
+.cascade[data-reveal="all"] .band[data-fired="true"] .on-demand { opacity: 1; }
+
+.cascade .band:hover .band-bg { stroke-width: 2; cursor: pointer; }
+
+/* --- Status dot --- */
+.cascade .band .status circle { stroke: #000000; stroke-width: 1.5; }
+.cascade .band[data-fired="true"]  .status circle { fill: #000000; }
+.cascade .band[data-fired="false"] .status circle { fill: #FFFFFF; }
+
+/* --- Resolution arrow --- */
+.cascade .resolution-arrow {
+  stroke: #000000;
+  stroke-width: 2;
+  fill: none;
+}
+.cascade .resolution-label { font-size: 10px; fill: #555555; }
+
+/* --- Horizontal force strip (replaces the old vertical force scale) ---
+ * Four ordinal cells (advisory → strong → mandatory → blocking) read as a
+ * vocabulary axis. Active cell takes the force tint at full strength + a
+ * bold dark-blue label (white text on the deepest tint for contrast).
+ * Inactive cells stay muted neutral.
+ */
+.cascade .force-strip .strip-cell-bg {
+  fill: #F4F4F4;
+  stroke: #E0E0E0;
+  stroke-width: 1;
+}
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="advisory"]  { fill: #E8F1F8; stroke: #BFD3E6; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="strong"]    { fill: #BFD3E6; stroke: #5B8AB8; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="mandatory"] { fill: #F2C5A3; stroke: #D55E00; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="blocking"]  { fill: #D55E00; stroke: #1F3D5C; }
+
+.cascade .force-strip .strip-cell-label {
+  font-size: 11px;
+  fill: #888888;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-label { fill: #1F3D5C; font-weight: 700; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="blocking"] + .strip-cell-label,
+.cascade .force-strip .strip-cell[data-active="true"][data-level="blocking"] .strip-cell-label { fill: #FFFFFF; }
+
+/* --- Safety lift arrow under the strip (visual only; textual rationale
+       lives in the safety banner below) --- */
+.cascade .force-strip .strip-safety-arrow {
+  stroke: #D55E00;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* --- Safety banner (vermillion accent strip + textual rationale) ---
+ * Vermillion across the cascade always means "needs attention" — visual
+ * rhyme with the threshold tick in Panel 1 and detected signals in Panel 2.
+ */
+.cascade .safety-banner .safety-bg {
+  fill: #FFF6EF;             /* very pale vermillion wash */
+  stroke: #F2C5A3;
+  stroke-width: 1;
+}
+.cascade .safety-banner .safety-accent {
+  fill: #D55E00;
+}
+.cascade .safety-banner .safety-title {
+  font-size: 11px;
+  font-weight: 600;
+  fill: #1F3D5C;
+}
+.cascade .safety-banner .safety-detail {
+  font-size: 10px;
+  fill: #555555;
+}
+
+/* --- Output box (canonical cue display: action + force pill + via caption) ---
+ * No box background — the panel cell is the container. Action is the
+ * typographic hero; pill is the visual hero (force-tint at full strength).
+ * Force tints CVD-safe per §9:
+ *   advisory  #E8F1F8  pale blue
+ *   strong    #BFD3E6  mid blue
+ *   mandatory #F2C5A3  vermillion-tinted
+ *   blocking  #D55E00  deep vermillion (white text inside the pill)
+ */
+.cascade .output .cue-action {
+  font-size: 22px;
+  font-weight: 700;
+  fill: #1F3D5C;
+  letter-spacing: 0.02em;
+}
+
+.cascade .output .cue-via {
+  font-size: 10px;
+  fill: #888888;
+  font-style: italic;
+}
+
+.cascade .output .force-pill { stroke: none; }
+.cascade .output .force-pill[data-force="advisory"]  { fill: #E8F1F8; }
+.cascade .output .force-pill[data-force="strong"]    { fill: #BFD3E6; }
+.cascade .output .force-pill[data-force="mandatory"] { fill: #F2C5A3; }
+.cascade .output .force-pill[data-force="blocking"]  { fill: #D55E00; }
+
+.cascade .output .force-word {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.cascade .output .force-word[data-force="advisory"]  { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="strong"]    { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="mandatory"] { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="blocking"]  { fill: #FFFFFF; }
+
+
+/* --- On-demand text (signal label only; rationale is always-visible via
+       band-rationale, and the rule id is debugging-only — kept in
+       data-rationale on the band group but not visually rendered). --- */
+.cascade .on-demand-signal    { font-size: 10px; font-style: italic; fill: #555555; }
+
+/* --- Always-visible band rationale (fired bands only, both reveal modes) ---
+ * Pulls visual weight onto the cascade where the contribution lives.
+ * Fired bands get a rationale line directly under their class label so
+ * the reader sees *what* fired, not just *that* it fired.
+ */
+.cascade .band-rationale {
+  font-size: 11px;
+  fill: #333333;
+}
+
+/* --- Mute unfired bands ---
+ * Per the 2e cascade review: unfired bands are reference material
+ * ("the system considered this and it didn't fire"), not primary content.
+ * Dropping their opacity lets fired bands dominate the visual hierarchy
+ * — mirrors Panel 2's detected-rail / undetected-list distinction.
+ */
+.cascade .band[data-fired="false"] { opacity: 0.45; }
+.cascade .band[data-fired="false"] .band-label { fill: #555555; }
+</style>
+  <g transform="translate(0, 0)">
+<svg viewBox="0 0 360 240" width="360" height="240" class="case-input" xmlns="http://www.w3.org/2000/svg">
+  
+  <rect class="case-badge" x="16" y="10" width="26" height="22" rx="4" />
+  <text class="case-badge-id" x="29" y="26" text-anchor="middle">CR</text>
+  <text class="domain-tag" x="50" y="24">credit_risk</text>
+  <text class="section-label" x="16" y="58">AI risk score</text>
+  <text class="score-value" x="195" y="90" text-anchor="middle">0.55</text>
+  <g transform="translate(16, 100)">
+<svg viewBox="0 0 328 56" width="328" height="56" class="interval-bar" xmlns="http://www.w3.org/2000/svg">
+  
+  <rect class="bar-track" x="12" y="22" width="304" height="8" rx="2" />
+  <rect class="bar-interval" x="140" y="22" width="79" height="8" rx="2" />
+  <line class="threshold-tick" x1="164" y1="16" x2="164" y2="36" />
+  <circle class="score-marker" cx="179" cy="26" r="5" />
+  <text class="endpoint-label" x="12" y="50" text-anchor="start">0.0</text>
+  <text class="endpoint-label" x="316" y="50" text-anchor="end">1.0</text>
+</svg>
+  </g>
+  <text class="threshold-label" x="180" y="158" text-anchor="middle">Threshold 0.50</text>
+  <text class="case-description" x="16" y="188"><tspan x="16" dy="0">Credit decision near regulatory threshold; applicant</tspan><tspan x="16" dy="14">data partly stale.</tspan></text>
+</svg>
+  </g>
+  <g transform="translate(360, 0)">
+<svg viewBox="0 0 360 240" width="360" height="240" class="signals" xmlns="http://www.w3.org/2000/svg">
+  
+  <text class="section-label" x="16" y="20">UNCERTAINTY SIGNALS</text>
+  <g class="signal-row" id="signal-row-missing_critical_data" data-detected="true" data-kind="detection">
+    <rect class="rail-accent" x="16" y="38" width="3" height="36" />
+    <circle class="signal-indicator" cx="30" cy="52" r="4" /><polygon class="signal-indicator" points="30,48 26,56 34,56" />
+    <text class="signal-label" x="40" y="52">Missing critical data</text>
+    <text class="signal-detail" x="40" y="66"><tspan x="40" dy="0">recent income verification</tspan></text>
+  </g>
+  <g class="signal-row" id="signal-row-out_of_scope" data-detected="true" data-kind="detection">
+    <rect class="rail-accent" x="16" y="78" width="3" height="36" />
+    <circle class="signal-indicator" cx="30" cy="92" r="4" /><polygon class="signal-indicator" points="30,88 26,96 34,96" />
+    <text class="signal-label" x="40" y="92">Out of scope</text>
+    <text class="signal-detail" x="40" y="106"><tspan x="40" dy="0">applicant profile rare in lender&#x27;s portfolio</tspan></text>
+  </g>
+  <g class="signal-row" id="signal-row-threshold_crossing" data-detected="true" data-kind="detection">
+    <rect class="rail-accent" x="16" y="118" width="3" height="36" />
+    <circle class="signal-indicator" cx="30" cy="132" r="4" /><polygon class="signal-indicator" points="30,128 26,136 34,136" />
+    <text class="signal-label" x="40" y="132">Interval crosses threshold</text>
+    <text class="signal-detail" x="40" y="146"><tspan x="40" dy="0">interval (0.42–0.68) contains threshold 0.50</tspan></text>
+  </g>
+  <g class="undetected-divider-group">
+    <text class="undetected-caption" x="16" y="160">not detected</text>
+    <line class="undetected-divider" x1="16" y1="164" x2="344" y2="164" />
+  </g>
+  <g class="signal-row" id="signal-row-explanation_instability" data-detected="false" data-kind="detection">
+    <circle class="signal-indicator" cx="22" cy="187" r="4" /><polygon class="signal-indicator" points="22,183 18,191 26,191" />
+    <text class="signal-label" x="32" y="190">Explanation instability</text>
+  </g>
+  <g class="signal-row" id="signal-row-decision_context" data-detected="false" data-kind="context">
+    <circle class="signal-indicator" cx="22" cy="205" r="4" /><polygon class="signal-indicator" points="22,201 18,209 26,209" />
+    <text class="signal-label" x="32" y="208">Decision context</text>
+  </g>
+</svg>
+  </g>
+  <g transform="translate(0, 240)">
+<svg viewBox="0 0 720 520" width="720" height="520" class="cascade" data-reveal="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="cascade-arrowhead" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+    </marker>
+  </defs>
+  
+  <g class="back-references"></g>
+  <g class="cascade-bands">
+    <g class="band" data-class="validity" data-fired="true" data-winner="true" data-rationale="Case is outside the validated scope: applicant profile rare in lender&#x27;s portfolio." data-signal-label="Out of scope">
+      <rect class="band-bg" x="40" y="20" width="320" height="80" />
+      <rect class="band-accent" x="40" y="20" width="6" height="80" />
+      <text class="band-label" x="54" y="50">Validity</text>
+      <text class="band-rationale" x="54" y="68"><tspan x="54" dy="0">Case is outside the validated scope: applicant</tspan><tspan x="54" dy="11">profile rare in lender&#x27;s portfolio.</tspan></text>
+      <g class="status">
+        <circle cx="340" cy="60" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        <text class="on-demand-signal" x="54" y="96">from signal: Out of scope</text>
+      </g>
+    </g>
+    <g class="band" data-class="completion" data-fired="true" data-winner="false" data-rationale="Critical inputs missing: recent income verification." data-signal-label="Missing critical data">
+      <rect class="band-bg" x="40" y="110" width="320" height="80" />
+      <rect class="band-accent" x="40" y="110" width="6" height="80" />
+      <text class="band-label" x="54" y="140">Completion</text>
+      <text class="band-rationale" x="54" y="158"><tspan x="54" dy="0">Critical inputs missing: recent income</tspan><tspan x="54" dy="11">verification.</tspan></text>
+      <g class="status">
+        <circle cx="340" cy="150" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        <text class="on-demand-signal" x="54" y="186">from signal: Missing critical data</text>
+      </g>
+    </g>
+    <g class="band" data-class="sensitivity" data-fired="true" data-winner="false" data-rationale="Risk interval (0.42–0.68) crosses the action threshold (0.50)." data-signal-label="Interval crosses threshold">
+      <rect class="band-bg" x="40" y="200" width="320" height="80" />
+      <rect class="band-accent" x="40" y="200" width="6" height="80" />
+      <text class="band-label" x="54" y="230">Sensitivity</text>
+      <text class="band-rationale" x="54" y="248"><tspan x="54" dy="0">Risk interval (0.42–0.68) crosses the action</tspan><tspan x="54" dy="11">threshold (0.50).</tspan></text>
+      <g class="status">
+        <circle cx="340" cy="240" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        <text class="on-demand-signal" x="54" y="276">from signal: Interval crosses threshold</text>
+      </g>
+    </g>
+    <g class="band" data-class="interpretation" data-fired="false" data-winner="false">
+      <rect class="band-bg" x="40" y="290" width="320" height="80" />
+      <rect class="band-accent" x="40" y="290" width="6" height="80" />
+      <text class="band-label" x="54" y="320">Interpretation</text>
+      
+      <g class="status">
+        <circle cx="340" cy="330" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        
+      </g>
+    </g>
+  </g>
+  <g class="resolution">
+    <path class="resolution-arrow" data-tip="highest-precedence fired class wins" d="M 360 60 L 390 60 L 390 194 L 420 194" marker-end="url(#cascade-arrowhead)" />
+  </g>
+  <g class="output" data-force="mandatory">
+    <text class="cue-action" x="490" y="168" text-anchor="middle">ESCALATE</text>
+    <rect class="force-pill" data-force="mandatory" x="432" y="182" width="116" height="24" rx="12" />
+    <text class="force-word" data-force="mandatory" x="490" y="198" text-anchor="middle">MANDATORY</text>
+    <text class="cue-via" x="490" y="224" text-anchor="middle">via validity</text>
+  </g>
+  <g class="force-strip">
+    <g class="strip-cell" data-level="advisory" data-active="false"><rect class="strip-cell-bg" data-level="advisory" x="114" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="174" y="392" text-anchor="middle">advisory</text></g>
+    <g class="strip-cell" data-level="strong" data-active="false"><rect class="strip-cell-bg" data-level="strong" x="238" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="298" y="392" text-anchor="middle">strong</text></g>
+    <g class="strip-cell" data-level="mandatory" data-active="true"><rect class="strip-cell-bg" data-level="mandatory" x="362" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="422" y="392" text-anchor="middle">mandatory</text></g>
+    <g class="strip-cell" data-level="blocking" data-active="false"><rect class="strip-cell-bg" data-level="blocking" x="486" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="546" y="392" text-anchor="middle">blocking</text></g>
+  </g>
+
+</svg>
+  </g>
+</svg>
+  </section>
+  <section>
+    <h2>Figure 4dr — generativity (Case DR, disaster, safety lift)</h2>
+    <svg viewBox="0 0 720 760" width="720" height="760" class="four-panel" xmlns="http://www.w3.org/2000/svg">
+  <style>/*
+ * Scoped stylesheet for Panel 1 (case input) and the standalone
+ * interval bar. Two scopes:
+ *
+ *   .case-input    panel-level rules: identity strip, section labels,
+ *                  description, threshold callout.
+ *   .interval-bar  the bar's own rules: track, shaded band, threshold
+ *                  tick, score marker, endpoint labels.
+ *
+ * The bar is scoped separately so render_interval_bar() can be
+ * rendered standalone (used directly in the three-way comparison's
+ * middle column in 2e) without depending on .case-input.
+ *
+ * Palette stays in the CVD-safe family established in 2b:
+ *   deep blue   #1F3D5C  primary text / score marker
+ *   mid blue    #5B8AB8  interval band, secondary accents
+ *   pale blue   #BFD3E6  fired/active tint
+ *   vermillion  #D55E00  threshold tick (high-attention, single hue)
+ *   neutrals    #FAFAFA #E0E0E0 #555555 #212121
+ */
+
+.case-input text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+
+/* --- Identity strip --- */
+.case-input .case-badge {
+  fill: #1F3D5C;
+  stroke: none;
+}
+.case-input .case-badge-id  { fill: #FFFFFF; font-size: 13px; font-weight: bold; }
+.case-input .domain-tag     { font-size: 12px; fill: #555555; }
+
+/* --- Section label above the bar --- */
+.case-input .section-label  { font-size: 11px; fill: #555555; letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* --- Score value floating above its marker --- */
+.case-input .score-value    { font-size: 18px; font-weight: bold; fill: #1F3D5C; }
+
+/* --- Threshold label below the threshold tick --- */
+.case-input .threshold-label{ font-size: 10px; fill: #D55E00; font-weight: bold; }
+
+/* --- Description (free-text context, smallest weight) --- */
+.case-input .case-description { font-size: 12px; fill: #333333; }
+
+/* --- Interval bar (scoped separately so it works standalone) --- */
+.interval-bar text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #555555;
+}
+.interval-bar .bar-track     { fill: #E0E0E0; }
+.interval-bar .bar-interval  { fill: #BFD3E6; }
+.interval-bar .threshold-tick { stroke: #D55E00; stroke-width: 2; fill: none; }
+.interval-bar .score-marker  { fill: #1F3D5C; stroke: #FFFFFF; stroke-width: 1.5; }
+.interval-bar .endpoint-label { font-size: 9px; }
+
+
+/*
+ * Scoped stylesheet for Panel 2 (uncertainty signals).
+ * Single top-level scope: .signals
+ *
+ * Two visual modes per row, switched by data-detected:
+ *   data-detected="true"  -> rail row: vermillion accent, filled indicator,
+ *                            weighty label, detail line shown
+ *   data-detected="false" -> list row: hollow indicator, muted label, no detail
+ *
+ * Two indicator shapes per row, switched by data-kind:
+ *   data-kind="detection" -> circle visible, triangle hidden
+ *   data-kind="context"   -> triangle visible, circle hidden
+ *
+ * Palette stays in the CVD-safe family locked in 2b:
+ *   vermillion #D55E00  detected accent strip + filled indicator
+ *   deep blue  #1F3D5C  detected label text
+ *   neutrals   #555555 #888888 #999999 #E0E0E0  undetected / dividers
+ */
+
+.signals text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+
+/* --- Section label --- */
+.signals .section-label {
+  font-size: 11px;
+  fill: #555555;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* --- Detected rail --- */
+.signals .rail-accent {
+  fill: #D55E00;
+}
+
+.signals .signal-row[data-detected="true"] .signal-indicator {
+  fill: #D55E00;
+  stroke: none;
+}
+
+.signals .signal-row[data-detected="true"] .signal-label {
+  font-size: 12px;
+  font-weight: 600;
+  fill: #1F3D5C;
+}
+
+.signals .signal-row[data-detected="true"] .signal-detail {
+  font-size: 10px;
+  fill: #555555;
+}
+
+/* --- Undetected list --- */
+.signals .signal-row[data-detected="false"] .signal-indicator {
+  fill: none;
+  stroke: #999999;
+  stroke-width: 1;
+}
+
+.signals .signal-row[data-detected="false"] .signal-label {
+  font-size: 11px;
+  fill: #888888;
+}
+
+/* --- Indicator shape swap by kind --- */
+.signals .signal-row[data-kind="detection"] polygon.signal-indicator {
+  display: none;
+}
+
+.signals .signal-row[data-kind="context"] circle.signal-indicator {
+  display: none;
+}
+
+/* --- Divider between rail and list --- */
+.signals .undetected-divider {
+  stroke: #E0E0E0;
+  stroke-dasharray: 2 3;
+  stroke-width: 1;
+}
+
+.signals .undetected-caption {
+  font-size: 9px;
+  fill: #999999;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+
+/*
+ * Scoped stylesheet for the ActionCue cascade renderer.
+ *
+ * All selectors are prefixed `.cascade` so multiple cascades on the
+ * same page (Week 3 three-way comparison) do not bleed styles.
+ *
+ * The palette is a deliberate deviation from SPEC.md §6 / §9 colors:
+ * every ordinal axis (force gradient) is encoded by luminance, and
+ * every categorical axis (class accents) uses Wong palette hues.
+ * This makes the design robust under protanopia, deuteranopia, and
+ * tritanopia.
+ */
+
+.cascade text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+.cascade .band-label { font-size: 14px; }
+.cascade .on-demand text { font-size: 12px; }
+
+/* --- Band background --- */
+.cascade .band-bg {
+  fill: #FFFFFF;
+  stroke: #D0D0D0;
+  stroke-width: 1;
+  rx: 4;
+}
+.cascade .band[data-fired="true"]  .band-bg { fill: #FAFAFA; }
+.cascade .band[data-winner="true"] .band-bg {
+  stroke: #000000;
+  stroke-width: 2;
+  fill: #F5F5F5;
+}
+
+/* --- Class accent stripe (categorical, Wong palette) --- */
+.cascade .band[data-class="validity"]       .band-accent { fill: #D55E00; }
+.cascade .band[data-class="completion"]     .band-accent { fill: #009E73; }
+.cascade .band[data-class="sensitivity"]    .band-accent { fill: #CC79A7; }
+.cascade .band[data-class="interpretation"] .band-accent { fill: #0072B2; }
+
+/* --- On-demand reveal layer --- */
+.cascade .band .on-demand {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease-out;
+}
+.cascade .band[data-expanded="true"] .on-demand { opacity: 1; }
+.cascade[data-reveal="all"] .band[data-fired="true"] .on-demand { opacity: 1; }
+
+.cascade .band:hover .band-bg { stroke-width: 2; cursor: pointer; }
+
+/* --- Status dot --- */
+.cascade .band .status circle { stroke: #000000; stroke-width: 1.5; }
+.cascade .band[data-fired="true"]  .status circle { fill: #000000; }
+.cascade .band[data-fired="false"] .status circle { fill: #FFFFFF; }
+
+/* --- Resolution arrow --- */
+.cascade .resolution-arrow {
+  stroke: #000000;
+  stroke-width: 2;
+  fill: none;
+}
+.cascade .resolution-label { font-size: 10px; fill: #555555; }
+
+/* --- Horizontal force strip (replaces the old vertical force scale) ---
+ * Four ordinal cells (advisory → strong → mandatory → blocking) read as a
+ * vocabulary axis. Active cell takes the force tint at full strength + a
+ * bold dark-blue label (white text on the deepest tint for contrast).
+ * Inactive cells stay muted neutral.
+ */
+.cascade .force-strip .strip-cell-bg {
+  fill: #F4F4F4;
+  stroke: #E0E0E0;
+  stroke-width: 1;
+}
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="advisory"]  { fill: #E8F1F8; stroke: #BFD3E6; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="strong"]    { fill: #BFD3E6; stroke: #5B8AB8; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="mandatory"] { fill: #F2C5A3; stroke: #D55E00; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="blocking"]  { fill: #D55E00; stroke: #1F3D5C; }
+
+.cascade .force-strip .strip-cell-label {
+  font-size: 11px;
+  fill: #888888;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-label { fill: #1F3D5C; font-weight: 700; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="blocking"] + .strip-cell-label,
+.cascade .force-strip .strip-cell[data-active="true"][data-level="blocking"] .strip-cell-label { fill: #FFFFFF; }
+
+/* --- Safety lift arrow under the strip (visual only; textual rationale
+       lives in the safety banner below) --- */
+.cascade .force-strip .strip-safety-arrow {
+  stroke: #D55E00;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* --- Safety banner (vermillion accent strip + textual rationale) ---
+ * Vermillion across the cascade always means "needs attention" — visual
+ * rhyme with the threshold tick in Panel 1 and detected signals in Panel 2.
+ */
+.cascade .safety-banner .safety-bg {
+  fill: #FFF6EF;             /* very pale vermillion wash */
+  stroke: #F2C5A3;
+  stroke-width: 1;
+}
+.cascade .safety-banner .safety-accent {
+  fill: #D55E00;
+}
+.cascade .safety-banner .safety-title {
+  font-size: 11px;
+  font-weight: 600;
+  fill: #1F3D5C;
+}
+.cascade .safety-banner .safety-detail {
+  font-size: 10px;
+  fill: #555555;
+}
+
+/* --- Output box (canonical cue display: action + force pill + via caption) ---
+ * No box background — the panel cell is the container. Action is the
+ * typographic hero; pill is the visual hero (force-tint at full strength).
+ * Force tints CVD-safe per §9:
+ *   advisory  #E8F1F8  pale blue
+ *   strong    #BFD3E6  mid blue
+ *   mandatory #F2C5A3  vermillion-tinted
+ *   blocking  #D55E00  deep vermillion (white text inside the pill)
+ */
+.cascade .output .cue-action {
+  font-size: 22px;
+  font-weight: 700;
+  fill: #1F3D5C;
+  letter-spacing: 0.02em;
+}
+
+.cascade .output .cue-via {
+  font-size: 10px;
+  fill: #888888;
+  font-style: italic;
+}
+
+.cascade .output .force-pill { stroke: none; }
+.cascade .output .force-pill[data-force="advisory"]  { fill: #E8F1F8; }
+.cascade .output .force-pill[data-force="strong"]    { fill: #BFD3E6; }
+.cascade .output .force-pill[data-force="mandatory"] { fill: #F2C5A3; }
+.cascade .output .force-pill[data-force="blocking"]  { fill: #D55E00; }
+
+.cascade .output .force-word {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.cascade .output .force-word[data-force="advisory"]  { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="strong"]    { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="mandatory"] { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="blocking"]  { fill: #FFFFFF; }
+
+
+/* --- On-demand text (signal label only; rationale is always-visible via
+       band-rationale, and the rule id is debugging-only — kept in
+       data-rationale on the band group but not visually rendered). --- */
+.cascade .on-demand-signal    { font-size: 10px; font-style: italic; fill: #555555; }
+
+/* --- Always-visible band rationale (fired bands only, both reveal modes) ---
+ * Pulls visual weight onto the cascade where the contribution lives.
+ * Fired bands get a rationale line directly under their class label so
+ * the reader sees *what* fired, not just *that* it fired.
+ */
+.cascade .band-rationale {
+  font-size: 11px;
+  fill: #333333;
+}
+
+/* --- Mute unfired bands ---
+ * Per the 2e cascade review: unfired bands are reference material
+ * ("the system considered this and it didn't fire"), not primary content.
+ * Dropping their opacity lets fired bands dominate the visual hierarchy
+ * — mirrors Panel 2's detected-rail / undetected-list distinction.
+ */
+.cascade .band[data-fired="false"] { opacity: 0.45; }
+.cascade .band[data-fired="false"] .band-label { fill: #555555; }
+</style>
+  <g transform="translate(0, 0)">
+<svg viewBox="0 0 360 240" width="360" height="240" class="case-input" xmlns="http://www.w3.org/2000/svg">
+  
+  <rect class="case-badge" x="16" y="10" width="26" height="22" rx="4" />
+  <text class="case-badge-id" x="29" y="26" text-anchor="middle">DR</text>
+  <text class="domain-tag" x="50" y="24">disaster</text>
+  <text class="section-label" x="16" y="58">AI risk score</text>
+  <text class="score-value" x="226" y="90" text-anchor="middle">0.65</text>
+  <g transform="translate(16, 100)">
+<svg viewBox="0 0 328 56" width="328" height="56" class="interval-bar" xmlns="http://www.w3.org/2000/svg">
+  
+  <rect class="bar-track" x="12" y="22" width="304" height="8" rx="2" />
+  <rect class="bar-interval" x="179" y="22" width="73" height="8" rx="2" />
+  <line class="threshold-tick" x1="194" y1="16" x2="194" y2="36" />
+  <circle class="score-marker" cx="210" cy="26" r="5" />
+  <text class="endpoint-label" x="12" y="50" text-anchor="start">0.0</text>
+  <text class="endpoint-label" x="316" y="50" text-anchor="end">1.0</text>
+</svg>
+  </g>
+  <text class="threshold-label" x="210" y="158" text-anchor="middle">Threshold 0.60</text>
+  <text class="case-description" x="16" y="188"><tspan x="16" dy="0">Evacuation trigger with model disagreement under high</tspan><tspan x="16" dy="14">harm conditions.</tspan></text>
+</svg>
+  </g>
+  <g transform="translate(360, 0)">
+<svg viewBox="0 0 360 240" width="360" height="240" class="signals" xmlns="http://www.w3.org/2000/svg">
+  
+  <text class="section-label" x="16" y="20">UNCERTAINTY SIGNALS</text>
+  <g class="signal-row" id="signal-row-threshold_crossing" data-detected="true" data-kind="detection">
+    <rect class="rail-accent" x="16" y="38" width="3" height="36" />
+    <circle class="signal-indicator" cx="30" cy="52" r="4" /><polygon class="signal-indicator" points="30,48 26,56 34,56" />
+    <text class="signal-label" x="40" y="52">Interval crosses threshold</text>
+    <text class="signal-detail" x="40" y="66"><tspan x="40" dy="0">interval (0.55–0.79) contains threshold 0.60</tspan></text>
+  </g>
+  <g class="signal-row" id="signal-row-explanation_instability" data-detected="true" data-kind="detection">
+    <rect class="rail-accent" x="16" y="78" width="3" height="36" />
+    <circle class="signal-indicator" cx="30" cy="92" r="4" /><polygon class="signal-indicator" points="30,88 26,96 34,96" />
+    <text class="signal-label" x="40" y="92">Explanation instability</text>
+    <text class="signal-detail" x="40" y="106"><tspan x="40" dy="0">two ensemble models assign different risk</tspan><tspan x="40" dy="11">categories</tspan></text>
+  </g>
+  <g class="signal-row" id="signal-row-decision_context" data-detected="true" data-kind="context">
+    <rect class="rail-accent" x="16" y="118" width="3" height="36" />
+    <circle class="signal-indicator" cx="30" cy="132" r="4" /><polygon class="signal-indicator" points="30,128 26,136 34,136" />
+    <text class="signal-label" x="40" y="132">Decision context</text>
+    <text class="signal-detail" x="40" y="146"><tspan x="40" dy="0">high harm, low reversibility</tspan></text>
+  </g>
+  <g class="undetected-divider-group">
+    <text class="undetected-caption" x="16" y="160">not detected</text>
+    <line class="undetected-divider" x1="16" y1="164" x2="344" y2="164" />
+  </g>
+  <g class="signal-row" id="signal-row-missing_critical_data" data-detected="false" data-kind="detection">
+    <circle class="signal-indicator" cx="22" cy="187" r="4" /><polygon class="signal-indicator" points="22,183 18,191 26,191" />
+    <text class="signal-label" x="32" y="190">Missing critical data</text>
+  </g>
+  <g class="signal-row" id="signal-row-out_of_scope" data-detected="false" data-kind="detection">
+    <circle class="signal-indicator" cx="22" cy="205" r="4" /><polygon class="signal-indicator" points="22,201 18,209 26,209" />
+    <text class="signal-label" x="32" y="208">Out of scope</text>
+  </g>
+</svg>
+  </g>
+  <g transform="translate(0, 240)">
+<svg viewBox="0 0 720 520" width="720" height="520" class="cascade" data-reveal="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="cascade-arrowhead" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+    </marker>
+  </defs>
+  
+  <g class="back-references"></g>
+  <g class="cascade-bands">
+    <g class="band" data-class="validity" data-fired="false" data-winner="false">
+      <rect class="band-bg" x="40" y="20" width="320" height="80" />
+      <rect class="band-accent" x="40" y="20" width="6" height="80" />
+      <text class="band-label" x="54" y="50">Validity</text>
+      
+      <g class="status">
+        <circle cx="340" cy="60" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        
+      </g>
+    </g>
+    <g class="band" data-class="completion" data-fired="false" data-winner="false">
+      <rect class="band-bg" x="40" y="110" width="320" height="80" />
+      <rect class="band-accent" x="40" y="110" width="6" height="80" />
+      <text class="band-label" x="54" y="140">Completion</text>
+      
+      <g class="status">
+        <circle cx="340" cy="150" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        
+      </g>
+    </g>
+    <g class="band" data-class="sensitivity" data-fired="true" data-winner="true" data-rationale="Risk interval (0.55–0.79) crosses the action threshold (0.60)." data-signal-label="Interval crosses threshold">
+      <rect class="band-bg" x="40" y="200" width="320" height="80" />
+      <rect class="band-accent" x="40" y="200" width="6" height="80" />
+      <text class="band-label" x="54" y="230">Sensitivity</text>
+      <text class="band-rationale" x="54" y="248"><tspan x="54" dy="0">Risk interval (0.55–0.79) crosses the action</tspan><tspan x="54" dy="11">threshold (0.60).</tspan></text>
+      <g class="status">
+        <circle cx="340" cy="240" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        <text class="on-demand-signal" x="54" y="276">from signal: Interval crosses threshold</text>
+      </g>
+    </g>
+    <g class="band" data-class="interpretation" data-fired="true" data-winner="false" data-rationale="Explanation instability detected: two ensemble models assign different risk categories." data-signal-label="Explanation instability">
+      <rect class="band-bg" x="40" y="290" width="320" height="80" />
+      <rect class="band-accent" x="40" y="290" width="6" height="80" />
+      <text class="band-label" x="54" y="320">Interpretation</text>
+      <text class="band-rationale" x="54" y="338"><tspan x="54" dy="0">Explanation instability detected: two ensemble</tspan><tspan x="54" dy="11">models assign different risk categories.</tspan></text>
+      <g class="status">
+        <circle cx="340" cy="330" r="6" />
+      </g>
+      <g class="on-demand" aria-hidden="true">
+        <text class="on-demand-signal" x="54" y="366">from signal: Explanation instability</text>
+      </g>
+    </g>
+  </g>
+  <g class="resolution">
+    <path class="resolution-arrow" data-tip="highest-precedence fired class wins" d="M 360 240 L 390 240 L 390 194 L 420 194" marker-end="url(#cascade-arrowhead)" />
+  </g>
+  <g class="output" data-force="mandatory">
+    <text class="cue-action" x="490" y="168" text-anchor="middle">INSPECT</text>
+    <rect class="force-pill" data-force="mandatory" x="432" y="182" width="116" height="24" rx="12" />
+    <text class="force-word" data-force="mandatory" x="490" y="198" text-anchor="middle">MANDATORY</text>
+    <text class="cue-via" x="490" y="224" text-anchor="middle">via sensitivity</text>
+  </g>
+  <g class="force-strip">
+    <g class="strip-cell" data-level="advisory" data-active="false"><rect class="strip-cell-bg" data-level="advisory" x="114" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="174" y="392" text-anchor="middle">advisory</text></g>
+    <g class="strip-cell" data-level="strong" data-active="false"><rect class="strip-cell-bg" data-level="strong" x="238" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="298" y="392" text-anchor="middle">strong</text></g>
+    <g class="strip-cell" data-level="mandatory" data-active="true"><rect class="strip-cell-bg" data-level="mandatory" x="362" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="422" y="392" text-anchor="middle">mandatory</text></g>
+    <g class="strip-cell" data-level="blocking" data-active="false"><rect class="strip-cell-bg" data-level="blocking" x="486" y="374" width="120" height="28" rx="4" /><text class="strip-cell-label" x="546" y="392" text-anchor="middle">blocking</text></g>
+    <g class="strip-safety" data-tip="Force raised from strong to mandatory due to high harm and low reversibility"><path class="strip-safety-arrow" d="M 298 416 L 422 416" marker-end="url(#cascade-arrowhead)" /></g>
+  </g>
+  <g class="safety-banner">
+    <rect class="safety-bg" x="16" y="438" width="688" height="32" rx="4" />
+    <rect class="safety-accent" x="16" y="438" width="3" height="32" />
+    <text class="safety-title" x="28" y="450">Force raised from strong to mandatory</text>
+    <text class="safety-detail" x="28" y="464">Reason: high harm and low reversibility</text>
+  </g>
+</svg>
+  </g>
+</svg>
+  </section>
+</body>
+</html>

@@ -1,0 +1,87 @@
+/*
+ * Scoped stylesheet for Panel 2 (uncertainty signals).
+ * Single top-level scope: .signals
+ *
+ * Two visual modes per row, switched by data-detected:
+ *   data-detected="true"  -> rail row: vermillion accent, filled indicator,
+ *                            weighty label, detail line shown
+ *   data-detected="false" -> list row: hollow indicator, muted label, no detail
+ *
+ * Two indicator shapes per row, switched by data-kind:
+ *   data-kind="detection" -> circle visible, triangle hidden
+ *   data-kind="context"   -> triangle visible, circle hidden
+ *
+ * Palette stays in the CVD-safe family locked in 2b:
+ *   vermillion #D55E00  detected accent strip + filled indicator
+ *   deep blue  #1F3D5C  detected label text
+ *   neutrals   #555555 #888888 #999999 #E0E0E0  undetected / dividers
+ */
+
+.signals text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+
+/* --- Section label --- */
+.signals .section-label {
+  font-size: 11px;
+  fill: #555555;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* --- Detected rail --- */
+.signals .rail-accent {
+  fill: #D55E00;
+}
+
+.signals .signal-row[data-detected="true"] .signal-indicator {
+  fill: #D55E00;
+  stroke: none;
+}
+
+.signals .signal-row[data-detected="true"] .signal-label {
+  font-size: 12px;
+  font-weight: 600;
+  fill: #1F3D5C;
+}
+
+.signals .signal-row[data-detected="true"] .signal-detail {
+  font-size: 10px;
+  fill: #555555;
+}
+
+/* --- Undetected list --- */
+.signals .signal-row[data-detected="false"] .signal-indicator {
+  fill: none;
+  stroke: #999999;
+  stroke-width: 1;
+}
+
+.signals .signal-row[data-detected="false"] .signal-label {
+  font-size: 11px;
+  fill: #888888;
+}
+
+/* --- Indicator shape swap by kind --- */
+.signals .signal-row[data-kind="detection"] polygon.signal-indicator {
+  display: none;
+}
+
+.signals .signal-row[data-kind="context"] circle.signal-indicator {
+  display: none;
+}
+
+/* --- Divider between rail and list --- */
+.signals .undetected-divider {
+  stroke: #E0E0E0;
+  stroke-dasharray: 2 3;
+  stroke-width: 1;
+}
+
+.signals .undetected-caption {
+  font-size: 9px;
+  fill: #999999;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}

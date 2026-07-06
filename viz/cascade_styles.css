@@ -1,0 +1,182 @@
+/*
+ * Scoped stylesheet for the ActionCue cascade renderer.
+ *
+ * All selectors are prefixed `.cascade` so multiple cascades on the
+ * same page (Week 3 three-way comparison) do not bleed styles.
+ *
+ * The palette is a deliberate deviation from SPEC.md §6 / §9 colors:
+ * every ordinal axis (force gradient) is encoded by luminance, and
+ * every categorical axis (class accents) uses Wong palette hues.
+ * This makes the design robust under protanopia, deuteranopia, and
+ * tritanopia.
+ */
+
+.cascade text {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: #212121;
+}
+.cascade .band-label { font-size: 14px; }
+.cascade .on-demand text { font-size: 12px; }
+
+/* --- Band background --- */
+.cascade .band-bg {
+  fill: #FFFFFF;
+  stroke: #D0D0D0;
+  stroke-width: 1;
+  rx: 4;
+}
+.cascade .band[data-fired="true"]  .band-bg { fill: #FAFAFA; }
+.cascade .band[data-winner="true"] .band-bg {
+  stroke: #000000;
+  stroke-width: 2;
+  fill: #F5F5F5;
+}
+
+/* --- Class accent stripe (categorical, Wong palette) --- */
+.cascade .band[data-class="validity"]       .band-accent { fill: #D55E00; }
+.cascade .band[data-class="completion"]     .band-accent { fill: #009E73; }
+.cascade .band[data-class="sensitivity"]    .band-accent { fill: #CC79A7; }
+.cascade .band[data-class="interpretation"] .band-accent { fill: #0072B2; }
+
+/* --- On-demand reveal layer --- */
+.cascade .band .on-demand {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease-out;
+}
+.cascade .band[data-expanded="true"] .on-demand { opacity: 1; }
+.cascade[data-reveal="all"] .band[data-fired="true"] .on-demand { opacity: 1; }
+
+.cascade .band:hover .band-bg { stroke-width: 2; cursor: pointer; }
+
+/* --- Status dot --- */
+.cascade .band .status circle { stroke: #000000; stroke-width: 1.5; }
+.cascade .band[data-fired="true"]  .status circle { fill: #000000; }
+.cascade .band[data-fired="false"] .status circle { fill: #FFFFFF; }
+
+/* --- Resolution arrow --- */
+.cascade .resolution-arrow {
+  stroke: #000000;
+  stroke-width: 2;
+  fill: none;
+}
+.cascade .resolution-label { font-size: 10px; fill: #555555; }
+
+/* --- Horizontal force strip (replaces the old vertical force scale) ---
+ * Four ordinal cells (advisory → strong → mandatory → blocking) read as a
+ * vocabulary axis. Active cell takes the force tint at full strength + a
+ * bold dark-blue label (white text on the deepest tint for contrast).
+ * Inactive cells stay muted neutral.
+ */
+.cascade .force-strip .strip-cell-bg {
+  fill: #F4F4F4;
+  stroke: #E0E0E0;
+  stroke-width: 1;
+}
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="advisory"]  { fill: #E8F1F8; stroke: #BFD3E6; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="strong"]    { fill: #BFD3E6; stroke: #5B8AB8; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="mandatory"] { fill: #F2C5A3; stroke: #D55E00; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="blocking"]  { fill: #D55E00; stroke: #1F3D5C; }
+
+.cascade .force-strip .strip-cell-label {
+  font-size: 11px;
+  fill: #888888;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-label { fill: #1F3D5C; font-weight: 700; }
+.cascade .force-strip .strip-cell[data-active="true"] .strip-cell-bg[data-level="blocking"] + .strip-cell-label,
+.cascade .force-strip .strip-cell[data-active="true"][data-level="blocking"] .strip-cell-label { fill: #FFFFFF; }
+
+/* --- Safety lift arrow under the strip (visual only; textual rationale
+       lives in the safety banner below) --- */
+.cascade .force-strip .strip-safety-arrow {
+  stroke: #D55E00;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* --- Safety banner (vermillion accent strip + textual rationale) ---
+ * Vermillion across the cascade always means "needs attention" — visual
+ * rhyme with the threshold tick in Panel 1 and detected signals in Panel 2.
+ */
+.cascade .safety-banner .safety-bg {
+  fill: #FFF6EF;             /* very pale vermillion wash */
+  stroke: #F2C5A3;
+  stroke-width: 1;
+}
+.cascade .safety-banner .safety-accent {
+  fill: #D55E00;
+}
+.cascade .safety-banner .safety-title {
+  font-size: 11px;
+  font-weight: 600;
+  fill: #1F3D5C;
+}
+.cascade .safety-banner .safety-detail {
+  font-size: 10px;
+  fill: #555555;
+}
+
+/* --- Output box (canonical cue display: action + force pill + via caption) ---
+ * No box background — the panel cell is the container. Action is the
+ * typographic hero; pill is the visual hero (force-tint at full strength).
+ * Force tints CVD-safe per §9:
+ *   advisory  #E8F1F8  pale blue
+ *   strong    #BFD3E6  mid blue
+ *   mandatory #F2C5A3  vermillion-tinted
+ *   blocking  #D55E00  deep vermillion (white text inside the pill)
+ */
+.cascade .output .cue-action {
+  font-size: 22px;
+  font-weight: 700;
+  fill: #1F3D5C;
+  letter-spacing: 0.02em;
+}
+
+.cascade .output .cue-via {
+  font-size: 10px;
+  fill: #888888;
+  font-style: italic;
+}
+
+.cascade .output .force-pill { stroke: none; }
+.cascade .output .force-pill[data-force="advisory"]  { fill: #E8F1F8; }
+.cascade .output .force-pill[data-force="strong"]    { fill: #BFD3E6; }
+.cascade .output .force-pill[data-force="mandatory"] { fill: #F2C5A3; }
+.cascade .output .force-pill[data-force="blocking"]  { fill: #D55E00; }
+
+.cascade .output .force-word {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.cascade .output .force-word[data-force="advisory"]  { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="strong"]    { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="mandatory"] { fill: #1F3D5C; }
+.cascade .output .force-word[data-force="blocking"]  { fill: #FFFFFF; }
+
+
+/* --- On-demand text (signal label only; rationale is always-visible via
+       band-rationale, and the rule id is debugging-only — kept in
+       data-rationale on the band group but not visually rendered). --- */
+.cascade .on-demand-signal    { font-size: 10px; font-style: italic; fill: #555555; }
+
+/* --- Always-visible band rationale (fired bands only, both reveal modes) ---
+ * Pulls visual weight onto the cascade where the contribution lives.
+ * Fired bands get a rationale line directly under their class label so
+ * the reader sees *what* fired, not just *that* it fired.
+ */
+.cascade .band-rationale {
+  font-size: 11px;
+  fill: #333333;
+}
+
+/* --- Mute unfired bands ---
+ * Per the 2e cascade review: unfired bands are reference material
+ * ("the system considered this and it didn't fire"), not primary content.
+ * Dropping their opacity lets fired bands dominate the visual hierarchy
+ * — mirrors Panel 2's detected-rail / undetected-list distinction.
+ */
+.cascade .band[data-fired="false"] { opacity: 0.45; }
+.cascade .band[data-fired="false"] .band-label { fill: #555555; }

@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.DS_Store
+figures/*.svg
+scratch.html
+scratch_*.html
+scratch_*.svg
+scratch_*.py
