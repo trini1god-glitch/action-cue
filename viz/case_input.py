@@ -48,7 +48,7 @@ def _to_x(value: float, inner_width: int, x_offset: int) -> int:
 
 
 def render_interval_bar(case: Case, *, width: int = 320, height: int = 56,
-                        css: bool = True) -> str:
+                        css: bool = True, responsive: bool = False) -> str:
     """The risk interval bar alone: shaded interval band, threshold tick, point-estimate marker.
 
     Returns a complete <svg> fragment with its own viewBox so it can be
@@ -59,6 +59,10 @@ def render_interval_bar(case: Case, *, width: int = 320, height: int = 56,
     caller (e.g. ui/comparison.py) gets the bar styled. The embedded use
     inside render_case_input passes `css=False` to avoid double-injection
     — Panel 1 loads the same stylesheet at the panel level.
+
+    `responsive=True` emits `width="100%" height="auto"` on the outer <svg>
+    so the bar scales with its container. Used by the live Streamlit demo.
+    Figures pass responsive=False (default) to preserve fixed dimensions.
     """
     low, high = case.risk_interval
     threshold = case.decision_threshold
@@ -76,8 +80,9 @@ def render_interval_bar(case: Case, *, width: int = 320, height: int = 56,
     tick_bot = track_y + _BAR_TRACK_HEIGHT + _BAR_TICK_OVERHANG
 
     style = render_style("case_input_styles.css") if css else ""
+    svg_dims = 'width="100%" height="auto" preserveAspectRatio="xMidYMid meet"' if responsive else f'width="{width}" height="{height}"'
 
-    return f'''<svg viewBox="0 0 {width} {height}" width="{width}" height="{height}" class="interval-bar" xmlns="http://www.w3.org/2000/svg">
+    return f'''<svg viewBox="0 0 {width} {height}" {svg_dims} class="interval-bar" xmlns="http://www.w3.org/2000/svg">
   {style}
   <rect class="bar-track" x="{_BAR_PAD_X}" y="{track_y}" width="{inner_width}" height="{_BAR_TRACK_HEIGHT}" rx="2" />
   <rect class="bar-interval" x="{x_low}" y="{track_y}" width="{x_high - x_low}" height="{_BAR_TRACK_HEIGHT}" rx="2" />
@@ -135,12 +140,16 @@ def _render_description(case: Case, panel_width: int) -> str:
 
 
 def render_case_input(case: Case, *, width: int = 360, height: int = 240,
-                      css: bool = True, interactive: bool = False) -> str:
+                      css: bool = True, interactive: bool = False,
+                      responsive: bool = False) -> str:
     """Panel 1 SVG: case identity strip, AI risk score (as a label on the bar),
     interval bar with threshold tick, threshold label, description.
 
     `interactive` is part of the shared signature for the compositor in 2e;
     Panel 1 has no interactive affordances and ignores it.
+
+    `responsive=True` makes the outer <svg> scale with its container (live demo).
+    Figures pass responsive=False (default) to keep fixed dimensions.
     """
     bar_width = width - 2 * _PANEL_PAD_X
     bar_inner_width = bar_width - 2 * _BAR_PAD_X
@@ -156,7 +165,9 @@ def render_case_input(case: Case, *, width: int = 360, height: int = 240,
     threshold_label = _render_threshold_label(case, bar_inner_width)
     description = _render_description(case, width)
 
-    return f'''<svg viewBox="0 0 {width} {height}" width="{width}" height="{height}" class="case-input" xmlns="http://www.w3.org/2000/svg">
+    svg_dims = 'width="100%" height="auto" preserveAspectRatio="xMidYMid meet"' if responsive else f'width="{width}" height="{height}"'
+
+    return f'''<svg viewBox="0 0 {width} {height}" {svg_dims} class="case-input" xmlns="http://www.w3.org/2000/svg">
   {style}
 {identity}
 {section_label}

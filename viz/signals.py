@@ -173,12 +173,16 @@ def _render_divider(y: int, panel_width: int) -> str:
 # ---------------------------------------------------------------------------
 
 def render_signals(case: Case, *, width: int = 360, height: int = 220,
-                   css: bool = True, interactive: bool = False) -> str:
+                   css: bool = True, interactive: bool = False,
+                   responsive: bool = False) -> str:
     """Panel 2 SVG: detected-rail (fired signals, weighty) over
     undetected-list (unfired signals, compact), under a section label.
 
     `interactive` is accepted for compositor signature compatibility and
     ignored — Panel 2 has no JS affordances in 2d-2.
+
+    `responsive=True` makes the outer <svg> scale with its container (live demo).
+    Figures pass responsive=False (default) to keep fixed dimensions.
     """
     # Collect five signals in fixed order.
     signals: list[UncertaintySignal] = [
@@ -217,8 +221,9 @@ def render_signals(case: Case, *, width: int = 360, height: int = 220,
     )
     rail_svg = "\n".join(rail_rows)
     list_svg = "\n".join(list_rows)
+    svg_dims = 'width="100%" height="auto" preserveAspectRatio="xMidYMid meet"' if responsive else f'width="{width}" height="{height}"'
 
-    return f'''<svg viewBox="0 0 {width} {height}" width="{width}" height="{height}" class="signals" xmlns="http://www.w3.org/2000/svg">
+    return f'''<svg viewBox="0 0 {width} {height}" {svg_dims} class="signals" xmlns="http://www.w3.org/2000/svg">
   {style}
 {section_label}
 {rail_svg}

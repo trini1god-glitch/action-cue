@@ -5,4 +5,4 @@ from viz.case_input import render_case_input
 
 
 def render(case: Case) -> None:
-    components.html(render_case_input(case), height=220, scrolling=False)
+    components.html(render_case_input(case, responsive=True), height=220, scrolling=False)

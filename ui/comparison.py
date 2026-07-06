@@ -19,10 +19,10 @@ def render(case: Case) -> None:
     with col_unc:
         st.subheader("Uncertainty display only")
         st.metric("AI risk score", f"{case.risk_score:.2f}")
-        components.html(render_interval_bar(case), height=80, scrolling=False)
+        components.html(render_interval_bar(case, responsive=True), height=80, scrolling=False)
         st.caption(f"Decision threshold: {case.decision_threshold:.2f}")
 
     with col_ac:
         st.subheader("ActionCue (process transparency)")
         cue = compose_cue(case, RULES)
-        components.html(render_cascade(case, cue), height=560, scrolling=False)
+        components.html(render_cascade(case, cue, responsive=True), height=560, scrolling=False)

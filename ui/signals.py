@@ -5,4 +5,4 @@ from viz.signals import render_signals
 
 
 def render(case: Case) -> None:
-    components.html(render_signals(case), height=220, scrolling=False)
+    components.html(render_signals(case, responsive=True), height=220, scrolling=False)

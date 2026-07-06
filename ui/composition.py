@@ -8,4 +8,4 @@ from viz.cascade import render_cascade
 
 def render(case: Case) -> None:
     cue = compose_cue(case, RULES)
-    components.html(render_cascade(case, cue), height=560, scrolling=False)
+    components.html(render_cascade(case, cue, responsive=True), height=560, scrolling=False)

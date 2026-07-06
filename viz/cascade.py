@@ -292,6 +292,7 @@ def render_cascade(
     height: int = 500,
     css: bool = True,
     interactive: bool = True,
+    responsive: bool = False,
 ) -> str:
     """
     Return a complete SVG fragment that renders the composition trace for `case` and `cue`.
@@ -304,6 +305,9 @@ def render_cascade(
 
     - reveal="none" -> compact variant (Figures 1 and 2).
     - reveal="all"  -> detailed variant with on-demand layer expanded (Figure 3).
+
+    `responsive=True` makes the outer <svg> scale with its container (live demo).
+    Figures pass responsive=False (default) to keep fixed dimensions.
     """
     winner_class = (
         cue.primary_firing.rule.rule_class if cue.primary_firing else None
@@ -348,8 +352,9 @@ def render_cascade(
     style = render_style("cascade_styles.css") if css else ""
     script = _render_script() if interactive else ""
     defs = _render_defs()
+    svg_dims = 'width="100%" height="auto" preserveAspectRatio="xMidYMid meet"' if responsive else f'width="{width}" height="{height}"'
 
-    svg_body = f'''<svg viewBox="0 0 {width} {height}" width="{width}" height="{height}" class="cascade" data-reveal="{reveal}" xmlns="http://www.w3.org/2000/svg">
+    svg_body = f'''<svg viewBox="0 0 {width} {height}" {svg_dims} class="cascade" data-reveal="{reveal}" xmlns="http://www.w3.org/2000/svg">
 {defs}
   {style}
   <g class="back-references"></g>
