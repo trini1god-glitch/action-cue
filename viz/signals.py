@@ -221,7 +221,10 @@ def render_signals(case: Case, *, width: int = 360, height: int = 220,
     )
     rail_svg = "\n".join(rail_rows)
     list_svg = "\n".join(list_rows)
-    svg_dims = 'width="100%" height="auto" preserveAspectRatio="xMidYMid meet"' if responsive else f'width="{width}" height="{height}"'
+    svg_dims = (
+        f'width="100%" height="auto" preserveAspectRatio="xMidYMid meet" '
+        f'style="max-width:{width}px"'
+    ) if responsive else f'width="{width}" height="{height}"'
 
     return f'''<svg viewBox="0 0 {width} {height}" {svg_dims} class="signals" xmlns="http://www.w3.org/2000/svg">
   {style}

@@ -80,7 +80,10 @@ def render_interval_bar(case: Case, *, width: int = 320, height: int = 56,
     tick_bot = track_y + _BAR_TRACK_HEIGHT + _BAR_TICK_OVERHANG
 
     style = render_style("case_input_styles.css") if css else ""
-    svg_dims = 'width="100%" height="auto" preserveAspectRatio="xMidYMid meet"' if responsive else f'width="{width}" height="{height}"'
+    svg_dims = (
+        f'width="100%" height="auto" preserveAspectRatio="xMidYMid meet" '
+        f'style="max-width:{width}px"'
+    ) if responsive else f'width="{width}" height="{height}"'
 
     return f'''<svg viewBox="0 0 {width} {height}" {svg_dims} class="interval-bar" xmlns="http://www.w3.org/2000/svg">
   {style}
@@ -165,7 +168,10 @@ def render_case_input(case: Case, *, width: int = 360, height: int = 240,
     threshold_label = _render_threshold_label(case, bar_inner_width)
     description = _render_description(case, width)
 
-    svg_dims = 'width="100%" height="auto" preserveAspectRatio="xMidYMid meet"' if responsive else f'width="{width}" height="{height}"'
+    svg_dims = (
+        f'width="100%" height="auto" preserveAspectRatio="xMidYMid meet" '
+        f'style="max-width:{width}px"'
+    ) if responsive else f'width="{width}" height="{height}"'
 
     return f'''<svg viewBox="0 0 {width} {height}" {svg_dims} class="case-input" xmlns="http://www.w3.org/2000/svg">
   {style}
